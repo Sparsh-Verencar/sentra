@@ -7,6 +7,7 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -27,14 +28,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ConvexAuthNextjsServerProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </body>
-      </html>
-    </ConvexAuthNextjsServerProvider>
+    <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ConvexAuthNextjsServerProvider>
+        <html lang="en" suppressHydrationWarning>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+          </body>
+        </html>
+      </ConvexAuthNextjsServerProvider>
+    </ThemeProvider>
   );
 }
