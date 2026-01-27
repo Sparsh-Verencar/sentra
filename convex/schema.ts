@@ -22,15 +22,15 @@ export default defineSchema({
     address:v.string(),
     room_id:v.id("room")
   }),
-  room:defineTable({
-    room_no:v.string(),
-    capacity:v.number(),
-    block_id:v.id("block"),
-  }),
-  block:defineTable({
-    block_name:v.string(),
-    hostel_id:v.id("hostel"),
-  }),
+ room: defineTable({
+    room_no: v.string(),
+    capacity: v.number(),
+    block_id: v.id("block"),
+  }).index("by_block", ["block_id"]),
+  block: defineTable({
+    block_name: v.string(),
+    hostel_id: v.id("hostel"),
+  }).index("by_hostel", ["hostel_id"]),
   hostel:defineTable({
     hostel_name:v.string(),
     hostel_type:v.string(),
