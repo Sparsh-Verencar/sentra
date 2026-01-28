@@ -3,7 +3,7 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import {     SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { StudentAppSidebar } from "@/components/student-app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SectionCards } from "@/components/section-cards";
@@ -35,7 +35,7 @@ export default function RootLayout({
                         } as React.CSSProperties
                     }
                 >
-                    <AppSidebar variant="inset" />
+                    <StudentAppSidebar variant="inset" />
                     <SidebarInset>
                     <SiteHeader/>
                     {children}
