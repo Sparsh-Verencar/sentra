@@ -21,7 +21,7 @@ const Dashypage = () => {
     <>
       <center>
         <h1>welcome to dashboard</h1>
-        <Button onClick={()=>router.push("/dashboard")}>Shadcn button</Button>
+        <Button onClick={()=>router.push("/student-dashboard")}>Shadcn button</Button>
         <ModeToggle/>
       </center>
     </>
