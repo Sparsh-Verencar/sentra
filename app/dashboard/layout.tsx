@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {     SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -36,7 +36,10 @@ export default function RootLayout({
                     }
                 >
                     <AppSidebar variant="inset" />
+                    <SidebarInset>
+                    <SiteHeader/>
                     {children}
+                    </SidebarInset>
                 </SidebarProvider>
             </ConvexAuthNextjsServerProvider>
         </ThemeProvider>

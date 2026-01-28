@@ -60,6 +60,11 @@ const data = {
       url: "#",
       icon: BarChart3,
     },
+    {
+      title: "Account",
+      url: "#",
+      icon: User2 ,
+    },
   ],
   navClouds: [
     {
@@ -132,9 +137,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain as any} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
     </Sidebar>
   )
 }
