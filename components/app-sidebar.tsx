@@ -32,37 +32,37 @@ const data = {
   navMain: [
     {
       title: "Announcements",
-      url: "#",
+      url: "/dashboard/announcements",
       icon: Megaphone,
     },
     {
       title: "Complaints",
-      url: "#",
+      url: "/dashboard",
       icon: Book,
     },
     {
       title: "Staff",
-      url: "#",
+      url: "/dashboard",
       icon: User2,
     },
     {
       title: "Students",
-      url: "#",
+      url: "/dashboard",
       icon: GraduationCapIcon,
     },
     {
       title: "Hostel structure",
-      url: "#",
+      url: "/dashboard",
       icon: UniversityIcon,
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "/dashboard",
       icon: BarChart3,
     },
     {
       title: "Account",
-      url: "#",
+      url: "/dashboard/admin-id",
       icon: User2 ,
     },
   ],
