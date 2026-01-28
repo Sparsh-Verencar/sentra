@@ -9,7 +9,7 @@ import {
   IconInnerShadowTop,
 } from "@tabler/icons-react"
 
-import { NavMain } from "@/components/nav-main"
+import { StudentNavMain } from "@/components/student-nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -47,7 +47,7 @@ const studentData = {
     },
     {
       title: "Student Info",
-      url: "/student-dashboard/info",
+      url: "/student-dashboard/student-info",
       icon: GraduationCapIcon,
     },
   ],
@@ -73,7 +73,7 @@ export function StudentAppSidebar({ ...props }: React.ComponentProps<typeof Side
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={studentData.navMain as any} />
+        <StudentNavMain items={studentData.navMain as any} />
       </SidebarContent>
     </Sidebar>
   )
