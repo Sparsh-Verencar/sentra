@@ -23,3 +23,24 @@ export const createAnnouncement = mutation({
         console.log("Added new document with id:", id);
     },
 })
+
+export const deleteAnnouncement = mutation({
+  args: { id: v.id("announcement") },
+  handler: async (ctx, { id }) => {
+    await ctx.db.delete(id)
+    return id
+  },
+})
+
+export const updateAnnouncement = mutation({
+  args: { id: v.id("announcement"), title: v.string(), description: v.string(), tags: v.string(), date: v.string() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      title: args.title,
+      description: args.description,
+      tags: args.tags,
+      date: args.date,
+    })
+    return args.id
+  },
+})
