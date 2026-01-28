@@ -24,20 +24,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem disableTransitionOnChange>
-      <ConvexAuthNextjsServerProvider>
-        <html lang="en" suppressHydrationWarning>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            <ConvexClientProvider>{children}</ConvexClientProvider>
-          </body>
-        </html>
-      </ConvexAuthNextjsServerProvider>
-    </ThemeProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ConvexAuthNextjsServerProvider>
+            <ConvexClientProvider>
+              {children}
+            </ConvexClientProvider>
+          </ConvexAuthNextjsServerProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }
+
