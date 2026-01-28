@@ -9,11 +9,16 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as authActions from "../authActions.js";
 import type * as block from "../block.js";
 import type * as hostels from "../hostels.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as permissions from "../permissions.js";
+import type * as roles from "../roles.js";
 import type * as rooms from "../rooms.js";
+import type * as staff from "../staff.js";
+import type * as students from "../students.js";
 
 import type {
   ApiFromModules,
@@ -23,11 +28,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  authActions: typeof authActions;
   block: typeof block;
   hostels: typeof hostels;
   http: typeof http;
   myFunctions: typeof myFunctions;
+  permissions: typeof permissions;
+  roles: typeof roles;
   rooms: typeof rooms;
+  staff: typeof staff;
+  students: typeof students;
 }>;
 
 /**

@@ -20,7 +20,8 @@ export default defineSchema({
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    room_id:v.id("room")
+    room_id:v.id("room"),
+    student_password: v.string(),
   }),
  room: defineTable({
     room_no: v.string(),
@@ -44,7 +45,8 @@ export default defineSchema({
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    role_id:v.id("role")
+    role_id:v.id("role"),
+    staff_password: v.string(),
   }),
   announcement:defineTable({
     staff_id:v.id("management_staff"),

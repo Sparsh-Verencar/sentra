@@ -115,6 +115,7 @@ const rooms = useQuery(
         <TabsTrigger value="reports">Rooms</TabsTrigger>
       </TabsList>
 
+
       {/* ---------------------- HOSTEL TAB ---------------------- */}
       <TabsContent value="Hostel">
         <Card>
