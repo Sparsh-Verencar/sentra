@@ -37,7 +37,6 @@ export default defineSchema({
   }),
   management_staff:defineTable({
     hostel_id:v.id("hostel"),
-    role:v.string(),
     fname:v.string(),
     lname:v.string(),
     gender:v.string(),
