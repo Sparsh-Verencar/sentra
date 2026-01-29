@@ -14,23 +14,24 @@ export default defineSchema({
     fname:v.string(),
     lname:v.string(),
     date_of_birth:v.string(),
-    gender:v.string(),
+    gender: v.union(v.literal("male"), v.literal("female")),
     dept_name:v.string(),
     year_of_study:v.string(),
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    room_id:v.id("room")
+    room_id:v.id("room"),
+    student_password: v.string(),
   }),
-  room:defineTable({
-    room_no:v.string(),
-    capacity:v.number(),
-    block_id:v.id("block"),
-  }),
-  block:defineTable({
-    block_name:v.string(),
-    hostel_id:v.id("hostel"),
-  }),
+ room: defineTable({
+    room_no: v.string(),
+    capacity: v.number(),
+    block_id: v.id("block"),
+  }).index("by_block", ["block_id"]),
+  block: defineTable({
+    block_name: v.string(),
+    hostel_id: v.id("hostel"),
+  }).index("by_hostel", ["hostel_id"]),
   hostel:defineTable({
     hostel_name:v.string(),
     hostel_type:v.string(),
@@ -43,7 +44,19 @@ export default defineSchema({
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    role_id:v.id("role")
+    role_id:v.id("role"),
+    staff_password: v.string(),
+  }),
+
+  organisation:defineTable({ 
+    organisation_name:v.string(),
+  }),
+
+  admin:defineTable({
+      organisation_id: v.id("organisation"),
+      admin_name: v.string(),
+      email: v.string(),
+      password_hash: v.string(),
   }),
   announcement:defineTable({
     staff_id:v.id("management_staff"),
