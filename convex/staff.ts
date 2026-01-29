@@ -47,19 +47,21 @@ export const deleteStaff = mutation({
   },
 })
 
+
 export const updateStaff = mutation({
   args: {
     id: v.id("management_staff"),
     fname: v.string(),
     lname: v.string(),
-    role: v.string(),
+    gender: v.string(),
+    phone: v.number(),
     email: v.string(),
-    phone: v.string(),
-    avatarUrl: v.optional(v.string()),
+    address: v.string(),
+    hostel_id: v.id("hostel"),
+    role_id: v.id("role"),
   },
-  handler: async (ctx, args) => {
-    const { id, ...updates } = args
-    await ctx.db.patch(id, updates as any)
+  handler: async (ctx, { id, ...updates }) => {
+    await ctx.db.patch(id, updates)
     return id
   },
 })

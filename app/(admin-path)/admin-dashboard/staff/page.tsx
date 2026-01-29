@@ -31,9 +31,19 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-import { User as UserIcon } from "lucide-react"
+import {
+  User as UserIcon,
+  Edit as EditIcon,
+  Trash as TrashIcon,
+} from "lucide-react"
 
 type Staff = {
   _id: string
@@ -63,7 +73,11 @@ export default function StaffPage() {
   const hostels = useQuery(api.staff.getAllHostels) ?? []
 
   const createStaff = useMutation(api.staff.createStaff)
+  const updateStaff = useMutation(api.staff.updateStaff)
+  const deleteStaff = useMutation(api.staff.deleteStaff)
+
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
 
   const form = useForm({
     defaultValues: {
@@ -76,24 +90,68 @@ export default function StaffPage() {
       role_id: "",
       hostel_id: "",
     },
+    mode: "onChange",
   })
 
+  const openCreate = () => {
+    form.reset({
+      fname: "",
+      lname: "",
+      gender: "",
+      phone: "",
+      email: "",
+      address: "",
+      role_id: "",
+      hostel_id: "",
+    })
+    setEditingStaff(null)
+    setDrawerOpen(true)
+  }
+
+  const openEdit = (staff: Staff) => {
+    form.reset({
+      fname: staff.fname,
+      lname: staff.lname,
+      gender: staff.gender,
+      phone: staff.phone.toString(),
+      email: staff.email,
+      address: staff.address,
+      role_id: staff.role_id,
+      hostel_id: staff.hostel_id,
+    })
+    setEditingStaff(staff)
+    setDrawerOpen(true)
+  }
+
   const onSubmit = async (data: any) => {
-    // convert phone to number
-    await createStaff({
+    const payload = {
       ...data,
       phone: Number(data.phone),
-    })
+    }
+
+    if (editingStaff) {
+      await updateStaff({ id: editingStaff._id, ...payload })
+    } else {
+      await createStaff(payload)
+    }
+
     form.reset()
+    setEditingStaff(null)
     setDrawerOpen(false)
   }
 
-  // group staff by role
-  const staffByRole: Record<string, Staff[]> = {}
+  const handleDelete = async (id: any) => {
+    if (confirm("Are you sure you want to delete this staff?")) {
+      await deleteStaff({ id })
+    }
+  }
 
+  // Group staff by role
+  const staffByRole: Record<string, Staff[]> = {}
   roles.forEach((role: Role) => {
     staffByRole[role._id] =
-      staffData.filter((s: Staff) => String(s.role_id) === role._id) ?? []
+      (staffData as Staff[]).filter((s: Staff) => s.role_id === role._id) ??
+      []
   })
 
   return (
@@ -101,9 +159,7 @@ export default function StaffPage() {
 
       {/* ADD NEW STAFF BUTTON */}
       <div className="flex justify-start">
-        <Button onClick={() => setDrawerOpen(true)}>
-          Add Staff
-        </Button>
+        <Button onClick={openCreate}>Add Staff</Button>
       </div>
 
       {/* GROUPED STAFF SECTIONS */}
@@ -125,8 +181,29 @@ export default function StaffPage() {
                     {s.phone}
                   </p>
                   <p className="text-xs text-muted-foreground text-center">
-                    {hostels.find((h) => h._id === s.hostel_id)?.hostel_name}
+                    {
+                      hostels.find((h) => h._id === s.hostel_id)
+                        ?.hostel_name
+                    }
                   </p>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openEdit(s)}
+                    >
+                      <EditIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(s._id)}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
               </Card>
             ))}
@@ -134,15 +211,21 @@ export default function StaffPage() {
         </div>
       ))}
 
-      {/* ADD STAFF DRAWER */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="right">
+      {/* ADD / EDIT STAFF DRAWER */}
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        direction="right"
+      >
         <DrawerTrigger hidden />
 
         <DrawerContent className="overflow-y-auto h-full">
           <DrawerHeader>
-            <DrawerTitle>Add New Staff</DrawerTitle>
+            <DrawerTitle>
+              {editingStaff ? "Edit Staff" : "Add New Staff"}
+            </DrawerTitle>
             <DrawerDescription>
-              Fill in staff details below
+              Fill in the details below
             </DrawerDescription>
           </DrawerHeader>
 
@@ -152,84 +235,114 @@ export default function StaffPage() {
           >
             <FieldSet>
 
+              {/* FIRST NAME */}
               <Field>
                 <FieldLabel htmlFor="fname">First Name</FieldLabel>
-                <Input {...form.register("fname")} id="fname" required />
+                <Input
+                  {...form.register("fname", { required: true })}
+                  id="fname"
+                />
               </Field>
 
+              {/* LAST NAME */}
               <Field>
                 <FieldLabel htmlFor="lname">Last Name</FieldLabel>
-                <Input {...form.register("lname")} id="lname" required />
+                <Input
+                  {...form.register("lname", { required: true })}
+                  id="lname"
+                />
               </Field>
 
+              {/* GENDER */}
               <Field>
-                <FieldLabel htmlFor="gender">Gender</FieldLabel>
-                <Select {...form.register("gender")} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FieldLabel>Gender</FieldLabel>
+                <Controller
+                  control={form.control}
+                  name="gender"
+                  rules={{ required: "Please select a gender" }}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </Field>
 
+              {/* PHONE */}
               <Field>
                 <FieldLabel htmlFor="phone">Phone</FieldLabel>
-                <Input {...form.register("phone")} id="phone" type="tel" required />
+                <Input
+                  {...form.register("phone", { required: true })}
+                  id="phone"
+                  type="tel"
+                />
               </Field>
 
+              {/* EMAIL */}
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input {...form.register("email")} id="email" type="email" required />
+                <Input
+                  {...form.register("email", { required: true })}
+                  id="email"
+                  type="email"
+                />
               </Field>
 
+              {/* ADDRESS */}
               <Field>
                 <FieldLabel htmlFor="address">Address</FieldLabel>
                 <Input {...form.register("address")} id="address" />
               </Field>
 
+              {/* ROLE */}
               <Field>
-                <FieldLabel htmlFor="role_id">Role</FieldLabel>
-
+                <FieldLabel>Role</FieldLabel>
                 <Controller
                   control={form.control}
                   name="role_id"
                   rules={{ required: "Please select a role" }}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roles.map((h: Role) => (
-                          <SelectItem key={h._id} value={h._id}>
-                            {h.role_name}
+                        {roles.map((r: Role) => (
+                          <SelectItem key={r._id} value={r._id}>
+                            {r.role_name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   )}
                 />
-
-                {form.formState.errors.hostel_id && (
-                  <p className="text-destructive text-sm">
-                    {form.formState.errors.hostel_id.message}
-                  </p>
-                )}
               </Field>
 
+              {/* HOSTEL */}
               <Field>
-                <FieldLabel htmlFor="hostel_id">Hostel</FieldLabel>
-
+                <FieldLabel>Hostel</FieldLabel>
                 <Controller
                   control={form.control}
                   name="hostel_id"
                   rules={{ required: "Please select a hostel" }}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select hostel" />
                       </SelectTrigger>
@@ -243,18 +356,14 @@ export default function StaffPage() {
                     </Select>
                   )}
                 />
-
-                {form.formState.errors.hostel_id && (
-                  <p className="text-destructive text-sm">
-                    {form.formState.errors.hostel_id.message}
-                  </p>
-                )}
               </Field>
 
             </FieldSet>
 
             <DrawerFooter className="flex gap-2">
-              <Button type="submit">Save</Button>
+              <Button type="submit">
+                {editingStaff ? "Update" : "Save"}
+              </Button>
               <DrawerClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DrawerClose>
