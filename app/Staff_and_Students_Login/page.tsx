@@ -129,7 +129,7 @@ const handleAdminSignup = async () => {
 
   // ✅ Redirect on success
   if (res.success) {
-    router.push("/admin/onboarding");
+    router.push("/Onboarding");
   }
 };
 
@@ -285,7 +285,6 @@ const handleAdminSignup = async () => {
     </CardHeader>
   </Card>
 </TabsContent>
-
     </Tabs>
   );
 }

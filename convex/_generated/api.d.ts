@@ -17,6 +17,12 @@ import type * as block from "../block.js";
 import type * as hostels from "../hostels.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as permissions from "../permissions.js";
+import type * as roles from "../roles.js";
+import type * as rooms from "../rooms.js";
+import type * as staff from "../staff.js";
+import type * as students from "../students.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -25,12 +31,21 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
+  adminAuth: typeof adminAuth;
+  announcements: typeof announcements;
   auth: typeof auth;
   authActions: typeof authActions;
   block: typeof block;
   hostels: typeof hostels;
   http: typeof http;
   myFunctions: typeof myFunctions;
+  permissions: typeof permissions;
+  roles: typeof roles;
+  rooms: typeof rooms;
+  staff: typeof staff;
+  students: typeof students;
+  users: typeof users;
 }>;
 
 /**

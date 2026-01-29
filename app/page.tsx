@@ -9,7 +9,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import Router from "next/router";
-import SignIn from "./signin/page";
 
 
 
@@ -22,7 +21,7 @@ const Dashypage = () => {
     <>
       <center>
         <h1>welcome to dashboard</h1>
-        <Button onClick={()=>router.push("/dashboard")}>Shadcn button</Button>
+        <Button onClick={()=>router.push("/Staff_and_Students_Login")}>Shadcn button</Button>
         <ModeToggle/>
       </center>
     </>

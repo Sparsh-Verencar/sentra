@@ -26,13 +26,9 @@ export const addStaff = mutation({
     await ctx.db.insert("management_staff", {
       hostel_id: args.hostel_id,
       role_id: args.role_id,
-
-      role: roleDoc?.role_name ?? "Unknown",
-
       fname: args.fname,
       lname: args.lname,
       gender: args.gender,
-
       phone: args.phone,
       email: args.email,
       address: args.address,

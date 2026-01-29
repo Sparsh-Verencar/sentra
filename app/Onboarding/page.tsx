@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 
 import {
   Card,
@@ -117,7 +117,7 @@ const rooms = useQuery(
   //ADMIN LOGOUT
   const handleAdminLogout = async () => {
     await signOut();          // invalidate Convex Auth session
-    router.push("/Staff_and_Students_Login");         // or wherever you want after logout
+    router.push("/");         // or wherever you want after logout
   };
 
   return (

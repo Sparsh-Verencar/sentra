@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem disableTransitionOnChange>
-      <ConvexAuthNextjsServerProvider>
+      <ConvexAuthNextjsServerProvider apiRoute="/Staff_and_Students_Login">
         <html lang="en" suppressHydrationWarning>
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
