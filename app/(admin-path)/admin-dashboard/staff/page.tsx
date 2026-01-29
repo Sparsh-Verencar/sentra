@@ -7,7 +7,6 @@ import { api } from "@/convex/_generated/api"
 
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -27,7 +26,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Field,
-  FieldDescription,
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field"
@@ -66,6 +64,73 @@ type Hostel = {
   _id: string
   hostel_name: string
 }
+
+const StaffCard = ({
+  staff,
+  hostelName,
+  onEdit,
+  onDelete,
+}: {
+  staff: Staff
+  hostelName?: string
+  onEdit: (staff: Staff) => void
+  onDelete: (id: string) => void
+}) => (
+  <Card className="w-60 border shadow-sm">
+    <CardHeader className="flex flex-col items-center gap-1 bg-muted p-2 rounded-t-md">
+      {/* Icon Avatar */}
+      <div className="rounded-full bg-secondary p-3">
+        <UserIcon className="h-8 w-8 text-white" />
+      </div>
+
+      {/* Name */}
+      <CardTitle className="text-base font-semibold text-center">
+        {staff.fname} {staff.lname}
+      </CardTitle>
+    </CardHeader>
+
+    {/* Card Info */}
+    <div className="p-3 space-y-1 text-sm text-muted-foreground">
+      <div className="flex justify-between">
+        <span className="font-medium">Email:</span>
+        <span>{staff.email}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium">Phone:</span>
+        <span>{staff.phone}</span>
+      </div>
+      {hostelName && (
+        <div className="flex justify-between">
+          <span className="font-medium">Hostel:</span>
+          <span>{hostelName}</span>
+        </div>
+      )}
+      <div className="flex justify-between">
+        <span className="font-medium">Gender:</span>
+        <span>{staff.gender}</span>
+      </div>
+    </div>
+
+    {/* Actions */}
+    <div className="flex justify-between p-3 border-t pt-2">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onEdit(staff)}
+      >
+        <EditIcon className="h-4 w-4 mr-1" /> Edit
+      </Button>
+      <Button
+        size="sm"
+        variant="destructive"
+        onClick={() => onDelete(staff._id)}
+      >
+        <TrashIcon className="h-4 w-4 mr-1" /> Delete
+      </Button>
+    </div>
+  </Card>
+)
+
 
 export default function StaffPage() {
   const staffData = useQuery(api.staff.getAllStaff) ?? []
@@ -168,44 +233,15 @@ export default function StaffPage() {
           <h2 className="text-lg font-semibold mb-2">{role.role_name}</h2>
           <div className="flex gap-4 flex-wrap">
             {staffByRole[role._id]?.map((s: Staff) => (
-              <Card key={s._id} className="w-48">
-                <CardHeader className="flex flex-col items-center gap-2">
-                  <UserIcon className="h-10 w-10 text-muted-foreground" />
-                  <CardTitle className="text-sm text-center">
-                    {s.fname} {s.lname}
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {s.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {s.phone}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {
-                      hostels.find((h) => h._id === s.hostel_id)
-                        ?.hostel_name
-                    }
-                  </p>
-
-                  {/* ACTION BUTTONS */}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openEdit(s)}
-                    >
-                      <EditIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(s._id)}
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-              </Card>
+              <StaffCard
+                key={s._id}
+                staff={s}
+                hostelName={
+                  hostels.find((h) => h._id === s.hostel_id)?.hostel_name
+                }
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         </div>
