@@ -10,32 +10,52 @@ export const addStudent = mutation({
     fname: v.string(),
     lname: v.string(),
     date_of_birth: v.string(),
-    gender: v.string(),
+    gender: v.union(v.literal("male"), v.literal("female")),
     dept_name: v.string(),
     year_of_study: v.string(),
     phone: v.number(),
     email: v.string(),
     address: v.string(),
-
     roomId: v.id("room"),
-
-    student_password: v.string(), // ✅ already hashed from frontend
+    student_password: v.string(),
   },
 
   handler: async (ctx, args) => {
+    // ✅ Fetch room
+    const room = await ctx.db.get(args.roomId);
+    if (!room) throw new Error("Room not found");
+
+    // ✅ Fetch block
+    const block = await ctx.db.get(room.block_id);
+    if (!block) throw new Error("Block not found");
+
+    // ✅ Fetch hostel
+    const hostel = await ctx.db.get(block.hostel_id);
+    if (!hostel) throw new Error("Hostel not found");
+
+    // ✅ Gender Validation
+    if (hostel.hostel_type === "Boys" && args.gender !== "male") {
+      throw new Error("Boys hostel students must be Male");
+    }
+
+    if (hostel.hostel_type === "Girls" && args.gender !== "female") {
+      throw new Error("Girls hostel students must be Female");
+    }
+
+    const gender = args.gender.toLowerCase() as "male" | "female";
+    // ✅ Insert Student
     await ctx.db.insert("student", {
       fname: args.fname,
       lname: args.lname,
       date_of_birth: args.date_of_birth,
-      gender: args.gender,
+      gender,
       dept_name: args.dept_name,
       year_of_study: args.year_of_study,
       phone: args.phone,
       email: args.email,
       address: args.address,
       room_id: args.roomId,
-
-      student_password: args.student_password, // ✅ store directly
+      student_password: args.student_password,
     });
   },
 });
@@ -108,5 +128,44 @@ export const loginStudent = action({
       success: true,
       message: "Staff login successful ✅",
     };
+  },
+});
+//STUDENT DELETE
+export const deleteStudent = mutation({
+  args: {
+    studentId: v.id("student"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.studentId);
+  },
+});
+
+//UPDATE STUDENTS
+export const updateStudentDetails = mutation({
+  args: {
+    studentId: v.id("student"),
+
+    // ✅ Allowed editable fields only
+    fname: v.string(),
+    lname: v.string(),
+    date_of_birth: v.string(),
+    dept_name: v.string(),
+    year_of_study: v.string(),
+    phone: v.number(),
+    address: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.studentId, {
+      fname: args.fname,
+      lname: args.lname,
+      date_of_birth: args.date_of_birth,
+      dept_name: args.dept_name,
+      year_of_study: args.year_of_study,
+      phone: args.phone,
+      address: args.address,
+    });
+
+    return { success: true };
   },
 });

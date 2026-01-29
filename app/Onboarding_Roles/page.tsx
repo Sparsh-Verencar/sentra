@@ -6,6 +6,9 @@ const generatePassword = (length = 10) => {
     chars[Math.floor(Math.random() * chars.length)]
   ).join("");
 };
+import { studentSchema, staffSchema } from "../validator";
+
+import { User, Mail, Trash2, Pencil } from "lucide-react";
 
 import { useState } from "react";
 import { useQuery } from "convex/react";
@@ -48,6 +51,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command"
 import { Input } from "@/components/ui/input";
 export default function Onboarding_Roles() {
   /* ---------------- HOSTELS + BLOCKS ---------------- */
@@ -108,7 +122,52 @@ const [showStudentPassword, setShowStudentPassword] = useState(false);
 
 const handleAddStudent = async () => {
   if (!selectedRoom) return;
+  if (!selectedHostel) return;
 
+  // ✅ Convert hostel type → expected gender
+  const hostelType = selectedHostel.type.trim().toLowerCase();
+
+  let expectedGender: "male" | "female" | null = null;
+
+  if (hostelType.startsWith("boys")) {
+    expectedGender = "male";
+  }
+
+  if (hostelType.startsWith("girls")) {
+    expectedGender = "female";
+  }
+
+  // ✅ If hostel type is invalid
+  if (!expectedGender) {
+    alert("❌ Hostel type is invalid");
+    return;
+  }
+
+  // ✅ Gender mismatch check
+  if (gender !== expectedGender) {
+    alert(
+      `❌ Gender mismatch!\n\nSelected Hostel: ${selectedHostel.type}\nAllowed Gender: ${expectedGender}`
+    );
+    return;
+  }
+
+  const validation = studentSchema.safeParse({
+    fname,
+    lname,
+    date_of_birth: dob,
+    gender: gender,
+    dept_name: dept,
+    year_of_study: year,
+    phone,
+    email,
+    address,
+    student_password: studentPassword,
+  });
+
+  if (!validation.success) {
+    alert(validation.error.issues[0].message);
+    return;
+  }
   if (!studentPassword.trim()) {
     alert("Please enter or generate a password");
     return;
@@ -148,6 +207,80 @@ const handleAddStudent = async () => {
 
   setStudentOpen(false);
 };
+
+const [commandOpen, setCommandOpen] = useState(false);
+
+const [selectedStudent, setSelectedStudent] = useState<any>(null);
+const deleteStudent = useMutation(api.students.deleteStudent);
+const handleDeleteStudent = async () => {
+  if (!selectedStudent) return;
+
+  // ✅ Confirmation Popup
+  const confirmDelete = window.confirm(
+    "⚠ This will permanently delete this student.\n\nDo you want to continue?"
+  );
+
+  // If user clicks Cancel → Stop
+  if (!confirmDelete) return;
+
+  // ✅ Proceed with Delete
+  await deleteStudent({
+    studentId: selectedStudent._id,
+  });
+
+  alert("✅ Student Deleted Successfully");
+
+  setCommandOpen(false);
+};
+
+
+
+const updateStudent = useMutation(api.students.updateStudentDetails);
+const [renameOpen, setRenameOpen] = useState(false);
+
+/* Editable Fields */
+const [editFname, setEditFname] = useState("");
+const [editLname, setEditLname] = useState("");
+const [editDob, setEditDob] = useState("");
+const [editDept, setEditDept] = useState("");
+const [editYear, setEditYear] = useState("");
+const [editPhone, setEditPhone] = useState("");
+const [editAddress, setEditAddress] = useState("");
+const handleRenameStudent = () => {
+  if (!selectedStudent) return;
+
+  // ✅ Prefill editable fields
+  setEditFname(selectedStudent.fname);
+  setEditLname(selectedStudent.lname);
+  setEditDob(selectedStudent.date_of_birth);
+  setEditDept(selectedStudent.dept_name);
+  setEditYear(selectedStudent.year_of_study);
+  setEditPhone(String(selectedStudent.phone));
+  setEditAddress(selectedStudent.address);
+
+  setCommandOpen(false);
+  setRenameOpen(true);
+};
+const handleSaveRename = async () => {
+  if (!selectedStudent) return;
+
+  await updateStudent({
+    studentId: selectedStudent._id,
+
+    fname: editFname,
+    lname: editLname,
+    date_of_birth: editDob,
+    dept_name: editDept,
+    year_of_study: editYear,
+    phone: Number(editPhone),
+    address: editAddress,
+  });
+
+  alert("Student Details Updated!");
+
+  setRenameOpen(false);
+};
+
 
 
 function PermissionSection() {
@@ -366,16 +499,33 @@ const [showStaffPassword, setShowStaffPassword] = useState(false);
 
   /* Submit */
   const handleAddStaff = async () => {
-  if (!selectedHostel || !selectedRole) return;
-
-  if (!staffPassword.trim()) {
-    alert("Please enter or generate a password");
+   if (!selectedHostel || !selectedRole) {
+    alert("Please select hostel and role");
     return;
   }
 
-  // ✅ HASH PASSWORD IN FRONTEND
+  // ✅ ZOD VALIDATION
+  const validation = staffSchema.safeParse({
+    fname,
+    lname,
+    gender,
+    phone,
+    email,
+    address,
+    staff_password: staffPassword,
+    hostel_id: selectedHostel,
+    role_id: selectedRole,
+  });
+
+  if (!validation.success) {
+    alert(validation.error.issues[0].message);
+    return;
+  }
+
+  // ✅ HASH PASSWORD
   const hashedPassword = await bcrypt.hash(staffPassword, 10);
 
+  // ✅ ADD STAFF
   await addStaff({
     hostel_id: selectedHostel,
     role_id: selectedRole,
@@ -385,12 +535,12 @@ const [showStaffPassword, setShowStaffPassword] = useState(false);
     phone: Number(phone),
     email,
     address,
-
-    // ✅ send hashed password
     staff_password: hashedPassword,
   });
 
-  // Reset after save
+  alert("✅ Staff Added Successfully!");
+
+  // Reset
   setSelectedHostel(null);
   setSelectedRole(null);
   setFname("");
@@ -475,11 +625,18 @@ const [showStaffPassword, setShowStaffPassword] = useState(false);
                 onChange={(e) => setLname(e.target.value)}
               />
 
-              <Input
-                placeholder="Gender"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              />
+<select
+  className="w-full border rounded-md p-2"
+  value={gender}
+  onChange={(e) => setGender(e.target.value)}
+>
+  <option value="">Select Gender</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
+
+
+
 
               <Input
                 placeholder="Phone"
@@ -831,11 +988,16 @@ const [showStaffPassword, setShowStaffPassword] = useState(false);
           onChange={(e) => setDob(e.target.value)}
         />
 
-        <Input
-          placeholder="Gender"
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-        />
+<select
+  className="w-full border rounded-md p-2"
+  value={gender}
+  onChange={(e) => setGender(e.target.value)}
+>
+  <option value="">Select Gender</option>
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select>
+
 
         <Input
           placeholder="Department"
@@ -924,38 +1086,154 @@ const [showStaffPassword, setShowStaffPassword] = useState(false);
       </TableHeader>
 
       <TableBody>
-        {students?.length > 0 ? (
-          students.map((student: any) => (
-            <TableRow key={student._id}>
-              <TableCell>{student.fname}</TableCell>
-              <TableCell>{student.lname}</TableCell>
-              <TableCell>{student.date_of_birth}</TableCell>
-              <TableCell>{student.gender}</TableCell>
-              <TableCell>{student.dept_name}</TableCell>
-              <TableCell>{student.year_of_study}</TableCell>
-              <TableCell>{student.phone}</TableCell>
-              <TableCell>{student.email}</TableCell>
-              <TableCell>{student.address}</TableCell>
-              <TableCell className="text-xs break-all">
-  {student.student_password}
-</TableCell>
+  {students?.length > 0 ? (
+    students.map((student: any) => (
+      <TableRow
+        key={student._id}
+        className="cursor-pointer hover:bg-gray-100"
+        onClick={() => {
+          setSelectedStudent(student);
+          setCommandOpen(true);
+        }}
+      >
+        <TableCell>{student.fname}</TableCell>
+        <TableCell>{student.lname}</TableCell>
+        <TableCell>{student.date_of_birth}</TableCell>
+        <TableCell>{student.gender}</TableCell>
+        <TableCell>{student.dept_name}</TableCell>
+        <TableCell>{student.year_of_study}</TableCell>
+        <TableCell>{student.phone}</TableCell>
+        <TableCell>{student.email}</TableCell>
+        <TableCell>{student.address}</TableCell>
+          <TableCell className="text-xs break-all">
+    {student.student_password}
+  </TableCell>
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell colSpan={9} className="text-center text-gray-500">
+        No students found.
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
 
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell
-              colSpan={9}
-              className="text-center text-gray-500"
-            >
-              No students found in this room.
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
     </Table>
+    
   </>
+  
 )}
+<CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+  <CommandInput placeholder="Select an action..." />
+
+  <CommandList>
+    <CommandEmpty>No actions found.</CommandEmpty>
+
+    {/* ✅ Student Info */}
+    {selectedStudent && (
+  <CommandGroup heading="Selected Student">
+    <CommandItem>
+      <User className="w-4 h-4 mr-2 text-gray-600" />
+      {selectedStudent.fname} {selectedStudent.lname}
+    </CommandItem>
+
+    <CommandItem>
+      <Mail className="w-4 h-4 mr-2 text-gray-600" />
+      {selectedStudent.email}
+    </CommandItem>
+  </CommandGroup>
+)}
+
+<CommandSeparator />
+
+{/* ✅ Actions */}
+<CommandGroup heading="Actions">
+  {/* Delete */}
+  <CommandItem
+    onSelect={handleDeleteStudent}
+    className="text-red-600 cursor-pointer"
+    
+  >
+
+
+    <Trash2 className="w-4 h-4 mr-2" />
+    Delete Student
+  </CommandItem>
+
+  {/* Rename */}
+  <CommandItem
+    onSelect={handleRenameStudent}
+    className="text-blue-600 cursor-pointer"
+  >
+    <Pencil className="w-4 h-4 mr-2" />
+    Rename Details
+  </CommandItem>
+</CommandGroup>
+
+  </CommandList>
+</CommandDialog>
+<Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+  <DialogContent className="max-w-lg">
+    <DialogHeader>
+      <DialogTitle>Edit Student Details</DialogTitle>
+      <DialogDescription>
+        You can update name, department, year, phone, address.
+        <br />
+        ❌ Gender, Email, Password cannot be changed.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-3 mt-4">
+      <Input
+        placeholder="First Name"
+        value={editFname}
+        onChange={(e) => setEditFname(e.target.value)}
+      />
+
+      <Input
+        placeholder="Last Name"
+        value={editLname}
+        onChange={(e) => setEditLname(e.target.value)}
+      />
+
+      <Input
+        placeholder="Date of Birth"
+        value={editDob}
+        onChange={(e) => setEditDob(e.target.value)}
+      />
+
+      <Input
+        placeholder="Department"
+        value={editDept}
+        onChange={(e) => setEditDept(e.target.value)}
+      />
+
+      <Input
+        placeholder="Year of Study"
+        value={editYear}
+        onChange={(e) => setEditYear(e.target.value)}
+      />
+
+      <Input
+        placeholder="Phone"
+        value={editPhone}
+        onChange={(e) => setEditPhone(e.target.value)}
+      />
+
+      <Input
+        placeholder="Address"
+        value={editAddress}
+        onChange={(e) => setEditAddress(e.target.value)}
+      />
+
+      {/* Save Button */}
+      <Button className="w-full" onClick={handleSaveRename}>
+        Save Changes
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
 
             </CardDescription>
           </CardHeader>

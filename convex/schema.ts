@@ -14,7 +14,7 @@ export default defineSchema({
     fname:v.string(),
     lname:v.string(),
     date_of_birth:v.string(),
-    gender:v.string(),
+    gender: v.union(v.literal("male"), v.literal("female")),
     dept_name:v.string(),
     year_of_study:v.string(),
     phone:v.number(),
@@ -47,6 +47,17 @@ export default defineSchema({
     address:v.string(),
     role_id:v.id("role"),
     staff_password: v.string(),
+  }),
+
+  organisation:defineTable({ 
+    organisation_name:v.string(),
+  }),
+
+  admin:defineTable({
+      organisation_id: v.id("organisation"),
+      admin_name: v.string(),
+      email: v.string(),
+      password_hash: v.string(),
   }),
   announcement:defineTable({
     staff_id:v.id("management_staff"),

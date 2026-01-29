@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useAction, useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 import {
   Card,
@@ -17,27 +18,42 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { z } from "zod"; // ✅ Import Zod
+
+import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuthActions } from "@convex-dev/auth/react";
 const emailSchema = z.email("Invalid email format");
+
 export default function Staff_and_Students_Login() {
+  const router = useRouter();
   
+
+
+  /* ---------------- STUDENT ---------------- */
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
+  const [studentEmailError, setStudentEmailError] = useState("");
 
+  /* ---------------- STAFF ---------------- */
   const [staffEmail, setStaffEmail] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
-
-  const [studentEmailError, setStudentEmailError] = useState("");
   const [staffEmailError, setStaffEmailError] = useState("");
-  // Convex Mutations
+
+  /* ---------------- ADMIN ---------------- */
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminEmailError, setAdminEmailError] = useState("");
+
+  /* ---------------- CONVEX ACTIONS ---------------- */
   const loginStudent = useAction(api.students.loginStudent);
   const loginStaff = useAction(api.staff.loginStaff);
 
-  // ✅ Student Login
-    const handleStudentLogin = async () => {
-    // 🔥 Validate Email using Zod
+  // ✅ NEW ADMIN LOGIN ACTION
+  const loginAdmin = useAction(api.adminAuth.loginAdmin);
+
+  /* ---------------- STUDENT LOGIN ---------------- */
+  const handleStudentLogin = async () => {
     const result = emailSchema.safeParse(studentEmail);
 
     if (!result.success) {
@@ -55,9 +71,8 @@ export default function Staff_and_Students_Login() {
     alert(res.message);
   };
 
-  // ✅ Staff Login
+  /* ---------------- STAFF LOGIN ---------------- */
   const handleStaffLogin = async () => {
-    // 🔥 Validate Email using Zod
     const result = emailSchema.safeParse(staffEmail);
 
     if (!result.success) {
@@ -75,9 +90,53 @@ export default function Staff_and_Students_Login() {
     alert(res.message);
   };
 
+  /* ---------------- ADMIN LOGIN ---------------- */
+  const handleAdminLogin = async () => {
+  const res = await loginAdmin({
+    email: adminEmail,
+    password: adminPassword,
+  });
+
+  alert(res.message);
+
+  if (res.success) {
+    router.push("/Onboarding");
+  }
+};
+
+
+  const [isAdminSignup, setIsAdminSignup] = useState(false);
+
+const [organisationName, setOrganisationName] = useState("");
+const [adminName, setAdminName] = useState("");
+const signupAdmin = useAction(api.adminAuth.signupAdmin);
+const handleAdminSignup = async () => {
+  const result = emailSchema.safeParse(adminEmail);
+
+  if (!result.success) {
+    setAdminEmailError(result.error.issues[0].message);
+    return;
+  }
+
+  const res = await signupAdmin({
+    organisation_name: organisationName,
+    admin_name: adminName,
+    email: adminEmail,
+    password: adminPassword,
+  });
+
+  alert(res.message);
+
+  // ✅ Redirect on success
+  if (res.success) {
+    router.push("/admin/onboarding");
+  }
+};
+
 
   return (
     <Tabs defaultValue="Student" className="w-[400px] mx-auto mt-10">
+      {/* Tabs */}
       <TabsList className="w-full">
         <TabsTrigger value="Student" className="w-full">
           Student Login
@@ -86,9 +145,14 @@ export default function Staff_and_Students_Login() {
         <TabsTrigger value="Staff" className="w-full">
           Staff Login
         </TabsTrigger>
+
+        {/* ✅ NEW ADMIN TAB */}
+        <TabsTrigger value="Admin" className="w-full">
+          Admin Login
+        </TabsTrigger>
       </TabsList>
 
-      {/* ✅ Student Login */}
+      {/* ---------------- STUDENT LOGIN ---------------- */}
       <TabsContent value="Student">
         <Card>
           <CardHeader>
@@ -101,7 +165,6 @@ export default function Staff_and_Students_Login() {
                 onChange={(e) => setStudentEmail(e.target.value)}
               />
 
-              {/* ✅ Email Error */}
               {studentEmailError && (
                 <p className="text-red-500 text-sm">{studentEmailError}</p>
               )}
@@ -121,7 +184,7 @@ export default function Staff_and_Students_Login() {
         </Card>
       </TabsContent>
 
-      {/* ✅ Staff Login */}
+      {/* ---------------- STAFF LOGIN ---------------- */}
       <TabsContent value="Staff">
         <Card>
           <CardHeader>
@@ -134,7 +197,6 @@ export default function Staff_and_Students_Login() {
                 onChange={(e) => setStaffEmail(e.target.value)}
               />
 
-              {/* ✅ Email Error */}
               {staffEmailError && (
                 <p className="text-red-500 text-sm">{staffEmailError}</p>
               )}
@@ -153,6 +215,77 @@ export default function Staff_and_Students_Login() {
           </CardHeader>
         </Card>
       </TabsContent>
+
+      {/* ---------------- ADMIN LOGIN ---------------- */}
+      <TabsContent value="Admin">
+  <Card>
+    <CardHeader>
+      <CardTitle>
+        {isAdminSignup ? "Admin Signup" : "Admin Login"}
+      </CardTitle>
+
+      <CardDescription className="space-y-3 mt-3">
+        {/* ✅ Signup Fields */}
+        {isAdminSignup && (
+          <>
+            <Input
+              placeholder="Organisation Name"
+              value={organisationName}
+              onChange={(e) => setOrganisationName(e.target.value)}
+            />
+
+            <Input
+              placeholder="Admin Name"
+              value={adminName}
+              onChange={(e) => setAdminName(e.target.value)}
+            />
+          </>
+        )}
+
+        {/* Email */}
+        <Input
+          placeholder="Admin Email"
+          value={adminEmail}
+          onChange={(e) => setAdminEmail(e.target.value)}
+        />
+
+        {adminEmailError && (
+          <p className="text-red-500 text-sm">{adminEmailError}</p>
+        )}
+
+        {/* Password */}
+        <Input
+          type="password"
+          placeholder="Admin Password"
+          value={adminPassword}
+          onChange={(e) => setAdminPassword(e.target.value)}
+        />
+
+        {/* Button */}
+        {isAdminSignup ? (
+          <Button className="w-full" onClick={handleAdminSignup}>
+            Signup Admin
+          </Button>
+        ) : (
+          <Button className="w-full" onClick={handleAdminLogin}>
+            Login Admin
+          </Button>
+        )}
+
+        {/* Toggle */}
+        <p
+          className="text-sm text-blue-600 cursor-pointer text-center"
+          onClick={() => setIsAdminSignup(!isAdminSignup)}
+        >
+          {isAdminSignup
+            ? "Already have an account? Login"
+            : "First time? Signup as Admin"}
+        </p>
+      </CardDescription>
+    </CardHeader>
+  </Card>
+</TabsContent>
+
     </Tabs>
   );
 }

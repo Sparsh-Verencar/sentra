@@ -37,8 +37,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 export default function Onboarding() {
+  const router = useRouter();
+
+const admin = useQuery(api.admin.getCurrentAdmin);
+const { signOut } = useAuthActions();
+
   const createHostel = useMutation(api.hostels.createHostel);
   const addBlock = useMutation(api.block.createBlock);
 
@@ -107,7 +114,41 @@ const rooms = useQuery(
     setCapacity(1);
   };
 
+  //ADMIN LOGOUT
+  const handleAdminLogout = async () => {
+    await signOut();          // invalidate Convex Auth session
+    router.push("/Staff_and_Students_Login");         // or wherever you want after logout
+  };
+
   return (
+      <div className="max-w-xl mx-auto mt-10">
+
+    {/* ---------------- ADMIN INFO HEADER ---------------- */}
+<Card className="mb-6">
+  <CardHeader className="flex flex-row items-center justify-between">
+
+    {/* Admin Details */}
+    <div>
+      <CardTitle className="text-lg">
+        Welcome, {admin?.admin_name}
+      </CardTitle>
+
+      <CardDescription className="space-y-1 mt-2">
+        <p>Email: <b>{admin?.email}</b></p>
+        <p>
+          Organisation: <b>{admin?.organisation_name}</b>
+        </p>
+      </CardDescription>
+    </div>
+
+    {/* Logout Button */}
+    <Button variant="destructive" onClick={handleAdminLogout}>
+      Logout
+    </Button>
+
+  </CardHeader>
+</Card>
+
     <Tabs defaultValue="overview" className="w-[400px]">
       <TabsList>
         <TabsTrigger value="Hostel">Hostel</TabsTrigger>
@@ -380,5 +421,6 @@ const rooms = useQuery(
 </TabsContent>
 
     </Tabs>
+    </div>
   );
 }
