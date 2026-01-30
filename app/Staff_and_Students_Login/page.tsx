@@ -75,7 +75,7 @@ export default function Staff_and_Students_Login() {
       try {
         await signupAdminRecord(pendingAdminSignup);
         setPendingAdminSignup(null);
-        router.push("/Onboarding");
+        router.push("/Onboarding_roles");
       } catch (err: any) {
         alert("Signup failed: " + err.message);
         setPendingAdminSignup(null);
@@ -159,147 +159,170 @@ export default function Staff_and_Students_Login() {
 
 
   return (
-    <Tabs defaultValue="Student" className="w-[400px] mx-auto mt-10">
-      {/* Tabs */}
-      <TabsList className="w-full">
-        <TabsTrigger value="Student" className="w-full">
-          Student Login
-        </TabsTrigger>
+  <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
-        <TabsTrigger value="Staff" className="w-full">
-          Staff Login
-        </TabsTrigger>
+    {/* ================= LEFT BRAND PANEL ================= */}
+    <div className="hidden lg:flex flex-col justify-center px-16
+      bg-gradient-to-br from-grey-600 to-purple-900 
+      text-white">
 
-        <TabsTrigger value="Admin" className="w-full">
-          Admin Login
-        </TabsTrigger>
-      </TabsList>
+      <h1 className="text-4xl font-bold mb-4">
+        Sentra
+      </h1>
 
-      {/* ---------------- STUDENT ---------------- */}
-      <TabsContent value="Student">
-        <Card>
-          <CardHeader>
-            <CardTitle>Student Login</CardTitle>
+      <p className="text-lg opacity-90 max-w-md">
+        Manage students, staff, hostels, rooms, and complaints —
+        all from one centralized platform.
+      </p>
 
-            <CardDescription className="space-y-3 mt-3">
-              <Input
-                placeholder="Student Email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-              />
+      <div className="mt-10 text-sm opacity-80">
+        © {new Date().getFullYear()} Sentra
+      </div>
+    </div>
 
-              <Input
-                type="password"
-                placeholder="Student Password"
-                value={studentPassword}
-                onChange={(e) => setStudentPassword(e.target.value)}
-              />
+    {/* ================= RIGHT LOGIN PANEL ================= */}
+    <div className="flex items-center justify-center bg-background px-6">
 
-              <Button className="w-full" onClick={handleStudentLogin}>
-                Login Student
-              </Button>
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </TabsContent>
+      <div className="w-full max-w-md">
+        <Tabs defaultValue="Student" className="w-full">
 
-      {/* ---------------- STAFF ---------------- */}
-      <TabsContent value="Staff">
-        <Card>
-          <CardHeader>
-            <CardTitle>Staff Login</CardTitle>
+          {/* Tabs */}
+          <TabsList className="w-full mb-6 grid grid-cols-3">
+            <TabsTrigger value="Student">Student</TabsTrigger>
+            <TabsTrigger value="Staff">Staff</TabsTrigger>
+            <TabsTrigger value="Admin">Admin</TabsTrigger>
+          </TabsList>
 
-            <CardDescription className="space-y-3 mt-3">
-              <Input
-                placeholder="Staff Email"
-                value={staffEmail}
-                onChange={(e) => setStaffEmail(e.target.value)}
-              />
-
-              <Input
-                type="password"
-                placeholder="Staff Password"
-                value={staffPassword}
-                onChange={(e) => setStaffPassword(e.target.value)}
-              />
-
-              <Button className="w-full" onClick={handleStaffLogin}>
-                Login Staff
-              </Button>
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </TabsContent>
-
-      {/* ---------------- ADMIN ---------------- */}
-      <TabsContent value="Admin">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isAdminSignup ? "Admin Signup" : "Admin Login"}
-            </CardTitle>
-
-            <CardDescription className="space-y-3 mt-3">
-              {/* Signup Extra Fields */}
-              {isAdminSignup && (
-                <>
+          {/* ---------------- STUDENT ---------------- */}
+          <TabsContent value="Student">
+            <Card>
+              <CardHeader>
+                <CardTitle>Student Login</CardTitle>
+                <CardDescription className="space-y-4 mt-4">
                   <Input
-                    placeholder="Organisation Name"
-                    value={organisationName}
-                    onChange={(e) => setOrganisationName(e.target.value)}
+                    placeholder="Student Email"
+                    value={studentEmail}
+                    onChange={(e) => setStudentEmail(e.target.value)}
                   />
 
                   <Input
-                    placeholder="Admin Name"
-                    value={adminName}
-                    onChange={(e) => setAdminName(e.target.value)}
+                    type="password"
+                    placeholder="Password"
+                    value={studentPassword}
+                    onChange={(e) =>
+                      setStudentPassword(e.target.value)
+                    }
                   />
-                </>
-              )}
 
-              {/* Email */}
-              <Input
-                placeholder="Admin Email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-              />
+                  <Button className="w-full" onClick={handleStudentLogin}>
+                    Login
+                  </Button>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
 
-              {adminEmailError && (
-                <p className="text-red-500 text-sm">{adminEmailError}</p>
-              )}
+          {/* ---------------- STAFF ---------------- */}
+          <TabsContent value="Staff">
+            <Card>
+              <CardHeader>
+                <CardTitle>Staff Login</CardTitle>
+                <CardDescription className="space-y-4 mt-4">
+                  <Input
+                    placeholder="Staff Email"
+                    value={staffEmail}
+                    onChange={(e) => setStaffEmail(e.target.value)}
+                  />
 
-              {/* Password */}
-              <Input
-                type="password"
-                placeholder="Admin Password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-              />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={staffPassword}
+                    onChange={(e) =>
+                      setStaffPassword(e.target.value)
+                    }
+                  />
 
-              {/* Button */}
-              {isAdminSignup ? (
-                <Button className="w-full" onClick={handleAdminSignup}>
-                  Signup Admin
-                </Button>
-              ) : (
-                <Button className="w-full" onClick={handleAdminLogin}>
-                  Login Admin
-                </Button>
-              )}
+                  <Button className="w-full" onClick={handleStaffLogin}>
+                    Login
+                  </Button>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
 
-              {/* Toggle */}
-              <p
-                className="text-sm text-blue-600 cursor-pointer text-center"
-                onClick={() => setIsAdminSignup(!isAdminSignup)}
-              >
-                {isAdminSignup
-                  ? "Already have an account? Login"
-                  : "First time? Signup as Admin"}
-              </p>
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </TabsContent>
-    </Tabs>
-  );
+          {/* ---------------- ADMIN ---------------- */}
+          <TabsContent value="Admin">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {isAdminSignup ? "Admin Signup" : "Admin Login"}
+                </CardTitle>
+
+                <CardDescription className="space-y-4 mt-4">
+
+                  {isAdminSignup && (
+                    <>
+                      <Input
+                        placeholder="Organisation Name"
+                        value={organisationName}
+                        onChange={(e) =>
+                          setOrganisationName(e.target.value)
+                        }
+                      />
+
+                      <Input
+                        placeholder="Admin Name"
+                        value={adminName}
+                        onChange={(e) =>
+                          setAdminName(e.target.value)
+                        }
+                      />
+                    </>
+                  )}
+
+                  <Input
+                    placeholder="Admin Email"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                  />
+
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={adminPassword}
+                    onChange={(e) =>
+                      setAdminPassword(e.target.value)
+                    }
+                  />
+
+                  {isAdminSignup ? (
+                    <Button className="w-full" onClick={handleAdminSignup}>
+                      Create Admin Account
+                    </Button>
+                  ) : (
+                    <Button className="w-full" onClick={handleAdminLogin}>
+                      Login
+                    </Button>
+                  )}
+
+                  <p
+                    className="text-sm text-muted-foreground text-center cursor-pointer hover:underline"
+                    onClick={() => setIsAdminSignup(!isAdminSignup)}
+                  >
+                    {isAdminSignup
+                      ? "Already have an account? Login"
+                      : "First time? Signup as Admin"}
+                  </p>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+
+        </Tabs>
+      </div>
+    </div>
+  </div>
+);
+
 }

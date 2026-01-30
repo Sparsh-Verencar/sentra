@@ -63,6 +63,8 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import { Input } from "@/components/ui/input";
+import { Router } from "next/router";
+import { useRouter } from "next/navigation";
 export default function Onboarding_Roles() {
   /* ---------------- HOSTELS + BLOCKS ---------------- */
 
@@ -84,6 +86,7 @@ export default function Onboarding_Roles() {
 
   const [selectedBlock, setSelectedBlock] = useState<Id<"block"> | null>(null);
   const [selectedBlockName, setSelectedBlockName] = useState("");
+  const router = useRouter()
 
   const rooms = useQuery(
     api.rooms.getRoomsByBlock,
@@ -1255,6 +1258,7 @@ const isRoomFull = currentCount >= roomCapacity;
 
         </Card>
       </TabsContent>
+      <Button onClick={router.push("Onboarding")}>Next</Button>
     </Tabs>
   );
 }
