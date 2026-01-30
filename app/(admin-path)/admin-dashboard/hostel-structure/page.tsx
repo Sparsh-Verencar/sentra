@@ -458,7 +458,7 @@ function RoomList({
   setEditing,
 }: any) {
   const rooms = useQuery(api.room.getRoomsByBlock, {
-    block_id: blockId,
+    blockId: blockId,
   });
 
   if (!rooms?.length) return null;

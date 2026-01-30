@@ -14,12 +14,12 @@ export const createRoom = mutation({
 });
 
 export const getRoomsByBlock = query({
-  args: { block_id: v.id("block") },
+  args: { blockId: v.id("block") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("room")
       .withIndex("by_block", (q) =>
-        q.eq("block_id", args.block_id)
+        q.eq("block_id", args.blockId)
       )
       .collect();
   },

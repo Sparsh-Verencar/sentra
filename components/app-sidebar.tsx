@@ -47,7 +47,7 @@ const data = {
     },
     {
       title: "Students",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/add-student",
       icon: GraduationCapIcon,
     },
     {
