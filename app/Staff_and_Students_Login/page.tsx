@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import {
   Card,
@@ -19,50 +20,93 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 
-import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAuthActions } from "@convex-dev/auth/react";
+
+import { z } from "zod";
+import { useAuthActions,  } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 const emailSchema = z.email("Invalid email format");
 
 export default function Staff_and_Students_Login() {
   const router = useRouter();
-  
 
+  /* ---------------- CONVEX AUTH ---------------- */
+  const { signIn } = useAuthActions();
 
   /* ---------------- STUDENT ---------------- */
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
-  const [studentEmailError, setStudentEmailError] = useState("");
 
   /* ---------------- STAFF ---------------- */
   const [staffEmail, setStaffEmail] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
-  const [staffEmailError, setStaffEmailError] = useState("");
 
   /* ---------------- ADMIN ---------------- */
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+
+  const [organisationName, setOrganisationName] = useState("");
+  const [adminName, setAdminName] = useState("");
+
   const [adminEmailError, setAdminEmailError] = useState("");
+
+  const [isAdminSignup, setIsAdminSignup] = useState(false);
 
   /* ---------------- CONVEX ACTIONS ---------------- */
   const loginStudent = useAction(api.students.loginStudent);
   const loginStaff = useAction(api.staff.loginStaff);
 
-  // ✅ NEW ADMIN LOGIN ACTION
-  const loginAdmin = useAction(api.adminAuth.loginAdmin);
+  // ✅ Create organisation + admin row
+   const { isAuthenticated, isLoading } = useConvexAuth();
+  const signupAdminRecord = useMutation(api.admin.signupAdminRecord);
+  const [pendingAdminSignup, setPendingAdminSignup] = useState<null | {
+    organisation_name: string;
+    admin_name: string;
+    email: string;
+    password: string;
+  }>(null);
+
+    useEffect(() => {
+    if (!pendingAdminSignup) return;
+    if (isLoading || !isAuthenticated) return;
+
+    (async () => {
+      try {
+        await signupAdminRecord(pendingAdminSignup);
+        setPendingAdminSignup(null);
+        router.push("/Onboarding");
+      } catch (err: any) {
+        alert("Signup failed: " + err.message);
+        setPendingAdminSignup(null);
+      }
+    })();
+  }, [pendingAdminSignup, isAuthenticated, isLoading, signupAdminRecord, router]);
+
+  const handleAdminSignup = async () => {
+    try {
+      await signIn("password", {
+        email: adminEmail,
+        password: adminPassword,
+        flow: "signUp",
+      });
+
+      // Defer the mutation until Convex reports isAuthenticated === true
+      setPendingAdminSignup({
+        organisation_name: organisationName,
+        admin_name: adminName,
+        email: adminEmail,
+        password: adminPassword,
+      });
+    } catch (err: any) {
+      alert("Signup failed: " + err.message);
+    }
+  };
+
+
 
   /* ---------------- STUDENT LOGIN ---------------- */
   const handleStudentLogin = async () => {
-    const result = emailSchema.safeParse(studentEmail);
-
-    if (!result.success) {
-      setStudentEmailError(result.error.issues[0].message);
-      return;
-    }
-
-    setStudentEmailError("");
-
     const res = await loginStudent({
       email: studentEmail,
       password: studentPassword,
@@ -73,15 +117,6 @@ export default function Staff_and_Students_Login() {
 
   /* ---------------- STAFF LOGIN ---------------- */
   const handleStaffLogin = async () => {
-    const result = emailSchema.safeParse(staffEmail);
-
-    if (!result.success) {
-      setStaffEmailError(result.error.issues[0].message);
-      return;
-    }
-
-    setStaffEmailError("");
-
     const res = await loginStaff({
       email: staffEmail,
       password: staffPassword,
@@ -90,48 +125,27 @@ export default function Staff_and_Students_Login() {
     alert(res.message);
   };
 
+  /* ---------------- ADMIN SIGNUP ---------------- */
+ 
+    
+
+
+
   /* ---------------- ADMIN LOGIN ---------------- */
   const handleAdminLogin = async () => {
-  const res = await loginAdmin({
-    email: adminEmail,
-    password: adminPassword,
-  });
+  try {
+    await signIn("password", {
+      email: adminEmail,
+      password: adminPassword,
+      flow: "signIn",
+    });
 
-  alert(res.message);
-
-  if (res.success) {
     router.push("/Onboarding");
+  } catch (err: any) {
+    alert("Login failed: " + err.message);
   }
 };
 
-
-  const [isAdminSignup, setIsAdminSignup] = useState(false);
-
-const [organisationName, setOrganisationName] = useState("");
-const [adminName, setAdminName] = useState("");
-const signupAdmin = useAction(api.adminAuth.signupAdmin);
-const handleAdminSignup = async () => {
-  const result = emailSchema.safeParse(adminEmail);
-
-  if (!result.success) {
-    setAdminEmailError(result.error.issues[0].message);
-    return;
-  }
-
-  const res = await signupAdmin({
-    organisation_name: organisationName,
-    admin_name: adminName,
-    email: adminEmail,
-    password: adminPassword,
-  });
-
-  alert(res.message);
-
-  // ✅ Redirect on success
-  if (res.success) {
-    router.push("/admin/onboarding");
-  }
-};
 
 
   return (
@@ -146,13 +160,12 @@ const handleAdminSignup = async () => {
           Staff Login
         </TabsTrigger>
 
-        {/* ✅ NEW ADMIN TAB */}
         <TabsTrigger value="Admin" className="w-full">
           Admin Login
         </TabsTrigger>
       </TabsList>
 
-      {/* ---------------- STUDENT LOGIN ---------------- */}
+      {/* ---------------- STUDENT ---------------- */}
       <TabsContent value="Student">
         <Card>
           <CardHeader>
@@ -164,10 +177,6 @@ const handleAdminSignup = async () => {
                 value={studentEmail}
                 onChange={(e) => setStudentEmail(e.target.value)}
               />
-
-              {studentEmailError && (
-                <p className="text-red-500 text-sm">{studentEmailError}</p>
-              )}
 
               <Input
                 type="password"
@@ -184,7 +193,7 @@ const handleAdminSignup = async () => {
         </Card>
       </TabsContent>
 
-      {/* ---------------- STAFF LOGIN ---------------- */}
+      {/* ---------------- STAFF ---------------- */}
       <TabsContent value="Staff">
         <Card>
           <CardHeader>
@@ -196,10 +205,6 @@ const handleAdminSignup = async () => {
                 value={staffEmail}
                 onChange={(e) => setStaffEmail(e.target.value)}
               />
-
-              {staffEmailError && (
-                <p className="text-red-500 text-sm">{staffEmailError}</p>
-              )}
 
               <Input
                 type="password"
@@ -216,76 +221,75 @@ const handleAdminSignup = async () => {
         </Card>
       </TabsContent>
 
-      {/* ---------------- ADMIN LOGIN ---------------- */}
+      {/* ---------------- ADMIN ---------------- */}
       <TabsContent value="Admin">
-  <Card>
-    <CardHeader>
-      <CardTitle>
-        {isAdminSignup ? "Admin Signup" : "Admin Login"}
-      </CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {isAdminSignup ? "Admin Signup" : "Admin Login"}
+            </CardTitle>
 
-      <CardDescription className="space-y-3 mt-3">
-        {/* ✅ Signup Fields */}
-        {isAdminSignup && (
-          <>
-            <Input
-              placeholder="Organisation Name"
-              value={organisationName}
-              onChange={(e) => setOrganisationName(e.target.value)}
-            />
+            <CardDescription className="space-y-3 mt-3">
+              {/* Signup Extra Fields */}
+              {isAdminSignup && (
+                <>
+                  <Input
+                    placeholder="Organisation Name"
+                    value={organisationName}
+                    onChange={(e) => setOrganisationName(e.target.value)}
+                  />
 
-            <Input
-              placeholder="Admin Name"
-              value={adminName}
-              onChange={(e) => setAdminName(e.target.value)}
-            />
-          </>
-        )}
+                  <Input
+                    placeholder="Admin Name"
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                  />
+                </>
+              )}
 
-        {/* Email */}
-        <Input
-          placeholder="Admin Email"
-          value={adminEmail}
-          onChange={(e) => setAdminEmail(e.target.value)}
-        />
+              {/* Email */}
+              <Input
+                placeholder="Admin Email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+              />
 
-        {adminEmailError && (
-          <p className="text-red-500 text-sm">{adminEmailError}</p>
-        )}
+              {adminEmailError && (
+                <p className="text-red-500 text-sm">{adminEmailError}</p>
+              )}
 
-        {/* Password */}
-        <Input
-          type="password"
-          placeholder="Admin Password"
-          value={adminPassword}
-          onChange={(e) => setAdminPassword(e.target.value)}
-        />
+              {/* Password */}
+              <Input
+                type="password"
+                placeholder="Admin Password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+              />
 
-        {/* Button */}
-        {isAdminSignup ? (
-          <Button className="w-full" onClick={handleAdminSignup}>
-            Signup Admin
-          </Button>
-        ) : (
-          <Button className="w-full" onClick={handleAdminLogin}>
-            Login Admin
-          </Button>
-        )}
+              {/* Button */}
+              {isAdminSignup ? (
+                <Button className="w-full" onClick={handleAdminSignup}>
+                  Signup Admin
+                </Button>
+              ) : (
+                <Button className="w-full" onClick={handleAdminLogin}>
+                  Login Admin
+                </Button>
+              )}
 
-        {/* Toggle */}
-        <p
-          className="text-sm text-blue-600 cursor-pointer text-center"
-          onClick={() => setIsAdminSignup(!isAdminSignup)}
-        >
-          {isAdminSignup
-            ? "Already have an account? Login"
-            : "First time? Signup as Admin"}
-        </p>
-      </CardDescription>
-    </CardHeader>
-  </Card>
-</TabsContent>
-
+              {/* Toggle */}
+              <p
+                className="text-sm text-blue-600 cursor-pointer text-center"
+                onClick={() => setIsAdminSignup(!isAdminSignup)}
+              >
+                {isAdminSignup
+                  ? "Already have an account? Login"
+                  : "First time? Signup as Admin"}
+              </p>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </TabsContent>
     </Tabs>
   );
 }

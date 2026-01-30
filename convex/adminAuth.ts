@@ -64,6 +64,7 @@ export const loginAdmin = action({
 
 export const signupAdmin = action({
   args: {
+     userId: v.id("users"), 
     organisation_name: v.string(),
     admin_name: v.string(),
     email: v.string(),
@@ -71,46 +72,30 @@ export const signupAdmin = action({
   },
 
   handler: async (ctx, args) => {
-    /* ✅ Check if admin already exists */
-    const existingAdmin = await ctx.runQuery(
-      internal.admin.getAdminByEmail,
-      {
-        email: args.email,
-      }
-    );
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
 
-    if (existingAdmin) {
-      return {
-        success: false,
-        message: "Admin already exists with this email",
-      };
-    }
+    const tokenIdentifier = identity.tokenIdentifier;
 
-    /* ✅ Hash password */
     const hashedPassword = await bcrypt.hash(args.password, 10);
 
-    /* ✅ Create organisation */
     const organisationId = await ctx.runMutation(
       internal.admin.createOrganisation,
-      {
-        organisation_name: args.organisation_name,
-      }
+      { organisation_name: args.organisation_name }
     );
 
-    /* ✅ Create admin */
     await ctx.runMutation(internal.admin.createAdmin, {
       organisation_id: organisationId,
       admin_name: args.admin_name,
       email: args.email,
       password_hash: hashedPassword,
+      userId: args.userId,
     });
 
-    return {
-      success: true,
-      message: "Admin Signup Successful ✅",
-    };
+    return { success: true };
   },
 });
+
 
 
 

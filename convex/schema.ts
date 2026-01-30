@@ -53,12 +53,14 @@ export default defineSchema({
     organisation_name:v.string(),
   }),
 
-  admin:defineTable({
-      organisation_id: v.id("organisation"),
-      admin_name: v.string(),
-      email: v.string(),
-      password_hash: v.string(),
-  }),
+// schema.ts
+admin: defineTable({
+  userId: v.id("users"),              // <— instead of tokenIdentifier
+  admin_name: v.string(),
+  email: v.string(),
+  organisation_id: v.id("organisation"),
+  password_hash: v.string(),
+}).index("by_userId", ["userId"]),
   announcement:defineTable({
     staff_id:v.id("management_staff"),
     title:v.string(),
