@@ -471,7 +471,7 @@ function RoomList({
           className="flex items-center gap-2 border px-3 py-1 rounded"
         >
           <span>
-            Room {room.room_no} · {room.capacity}
+            Room no:{room.room_no} | Capacity: {room.capacity}
           </span>
 
           <Button
