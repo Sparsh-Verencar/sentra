@@ -4,6 +4,7 @@ import { internalMutation } from "./_generated/server";
 import { query } from "./_generated/server";
 import { mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+
 export const getAdminByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
@@ -88,16 +89,19 @@ export const getCurrentAdmin = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
+    console.log(`userID:${userId}`)
     if (userId === null) return null;
-
+    
     const admin = await ctx.db
-      .query("admin")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-
+    .query("admin")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+    
+    console.log(`adminID:${userId}`)
     if (!admin) return null;
-
+    
     const organisation = await ctx.db.get(admin.organisation_id);
+    console.log(`orgID:${userId}`)
 
     return {
       _id: admin._id,

@@ -52,7 +52,7 @@ const data = {
     },
     {
       title: "Hostel structure",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/hostel-structure",
       icon: UniversityIcon,
     },
     {

@@ -20,6 +20,7 @@ import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as permissions from "../permissions.js";
 import type * as roles from "../roles.js";
+import type * as room from "../room.js";
 import type * as rooms from "../rooms.js";
 import type * as staff from "../staff.js";
 import type * as students from "../students.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   myFunctions: typeof myFunctions;
   permissions: typeof permissions;
   roles: typeof roles;
+  room: typeof room;
   rooms: typeof rooms;
   staff: typeof staff;
   students: typeof students;

@@ -33,3 +33,4 @@ export const getBlocksByHostel = query({
       .collect();
   },
 });
+
