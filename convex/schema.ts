@@ -60,13 +60,13 @@ admin: defineTable({
   organisation_id: v.id("organisation"),
   password_hash: v.string(),
 }).index("by_userId", ["userId"]),
-  announcement:defineTable({
-    staff_id:v.id("management_staff"),
-    title:v.string(),
-    description:v.string(),
-    tags:v.string(),
-    date:v.string( ),
-  }),
+announcement: defineTable({
+  userId: v.id("users"),   // creator (admin or staff)
+  title: v.string(),
+  description: v.string(),
+  tags: v.string(),
+  date: v.string(),
+}),
   role:defineTable({
     role_name:v.string(),
     permission_id:v.id("permissions"),

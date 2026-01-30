@@ -15,7 +15,16 @@ import { useQuery } from "convex/react"
 import { skip } from "node:test"
 
 export default function AdminId() {
-  const admin_details = useQuery(api.users.getAdmin, 'skip')
+  const admin = useQuery(api.admin.getCurrentAdmin, {});
+  if (admin === undefined) {
+    // still loading
+    return <div>Loading...</div>;
+  }
+
+  if (admin === null) {
+    // not authenticated or no admin record
+    return <div>No admin found</div>;
+  }
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-3xl border-2 border-accent-foreground">
@@ -32,24 +41,18 @@ export default function AdminId() {
           {/* INFO */}
           <div className="flex flex-col justify-center text-center md:text-left gap-1 md:w-[65%]">
             <h2 className="text-lg md:text-xl font-semibold">
-              Name:{admin_details?.fname} {admin_details?.lname}
+              Name: {admin.admin_name}
             </h2>
+            
             <p className="text-sm text-muted-foreground">
-              Admin ID: {admin_details?._id}
+               Organisation: {admin.organisation_name ?? "—"}
             </p>
+            
             <p className="text-sm text-muted-foreground">
-              Gender: {admin_details?.gender}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Phone:+91 {admin_details?.phone}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Email: {admin_details?.email}
+              Email: {admin.email}
             </p>
 
-            <p className="text-sm text-muted-foreground">
-              Address: {admin_details?.address}
-            </p>
+            
           </div>
           
         </CardContent>
