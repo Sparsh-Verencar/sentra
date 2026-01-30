@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Pencil, Trash2, UniversityIcon } from "lucide-react";
 
 import {
   Card,
@@ -14,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+
 import {
   Select,
   SelectContent,
@@ -32,34 +34,47 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { SelectLabel } from "@radix-ui/react-select";
-import { UniversityIcon } from "lucide-react";
 
+/* ========================================================= */
 
 export default function HostelPage() {
-  // ✅ CORRECT API NAMES
   const hostels = useQuery(api.hostels.getHostels);
-  const createHostel = useMutation(api.hostels.createHostel);
 
+  // hostel
+  const createHostel = useMutation(api.hostels.createHostel);
+  const updateHostel = useMutation(api.hostels.updateHostel);
+  const deleteHostel = useMutation(api.hostels.deleteHostel);
+
+  // block
   const createBlock = useMutation(api.block.createBlock);
+  const updateBlock = useMutation(api.block.updateBlock);
+  const deleteBlock = useMutation(api.block.deleteBlock);
+
+  // room
   const createRoom = useMutation(api.room.createRoom);
+  const updateRoom = useMutation(api.room.updateRoom);
+  const deleteRoom = useMutation(api.room.deleteRoom);
 
   const [hostelName, setHostelName] = useState("");
-  const [hostelType, setHostelType] = useState("boy");
+  const [hostelType, setHostelType] = useState("boys");
 
   const [blockNames, setBlockNames] = useState<Record<string, string>>({});
   const [roomNos, setRoomNos] = useState<Record<string, string>>({});
   const [capacities, setCapacities] = useState<Record<string, number>>({});
 
+  const [editing, setEditing] = useState<{
+    type: "hostel" | "block" | "room";
+    data: any;
+  } | null>(null);
+
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Hostel Management</h1>
+      <h1 className="text-2xl font-bold">Hostel Structure</h1>
 
-      {/* ADD HOSTEL */}
       {/* ADD HOSTEL DRAWER */}
       <Drawer direction="right">
         <DrawerTrigger asChild>
-          <Button className="w-fit">+ Add Hostel</Button>
+          <Button>+ Add Hostel</Button>
         </DrawerTrigger>
 
         <DrawerContent className="right-0 left-auto h-full w-[400px] rounded-none">
@@ -74,12 +89,8 @@ export default function HostelPage() {
               onChange={(e) => setHostelName(e.target.value)}
             />
 
-            <Select
-              value={hostelType}
-              onValueChange={(value) => setHostelType(value)}
-            >
+            <Select value={hostelType} onValueChange={setHostelType}>
               <SelectGroup>
-                <SelectLabel>Hostel Type</SelectLabel>
                 <SelectTrigger>
                   <SelectValue placeholder="Hostel type" />
                 </SelectTrigger>
@@ -115,16 +126,36 @@ export default function HostelPage() {
         </DrawerContent>
       </Drawer>
 
-
       <Separator />
 
-      {/* HOSTELS */}
+      {/* HOSTEL LIST */}
       {hostels?.map((hostel) => (
         <Card key={hostel._id}>
-          <CardHeader>
-            <CardTitle>
-              <UniversityIcon/> {hostel.hostel_name} ({hostel.hostel_type})
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <UniversityIcon />
+              {hostel.hostel_name} ({hostel.hostel_type})
             </CardTitle>
+
+            <div className="flex gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() =>
+                  setEditing({ type: "hostel", data: hostel })
+                }
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => deleteHostel({ id: hostel._id })}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
           </CardHeader>
 
           <CardContent className="space-y-4">
@@ -163,42 +194,209 @@ export default function HostelPage() {
             <BlockSection
               hostelId={hostel._id}
               createRoom={createRoom}
+              updateBlock={updateBlock}
+              updateRoom={updateRoom}
+              deleteBlock={deleteBlock}
+              deleteRoom={deleteRoom}
               roomNos={roomNos}
               capacities={capacities}
               setRoomNos={setRoomNos}
               setCapacities={setCapacities}
+              setEditing={setEditing}
             />
           </CardContent>
         </Card>
       ))}
+
+      {/* EDIT DRAWER */}
+      {editing && (
+        <Drawer
+          open={true}
+          onOpenChange={() => setEditing(null)}
+          direction="right"
+        >
+          <DrawerContent className="right-0 left-auto h-full w-[400px] rounded-none">
+            <DrawerHeader>
+              <DrawerTitle>Edit</DrawerTitle>
+            </DrawerHeader>
+
+            <div className="p-4 space-y-4">
+              {editing.type === "hostel" && (
+                <>
+                  <Input
+                    value={editing.data.hostel_name}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        data: {
+                          ...editing.data,
+                          hostel_name: e.target.value,
+                        },
+                      })
+                    }
+                  />
+
+                  <Select
+                    value={editing.data.hostel_type}
+                    onValueChange={(v) =>
+                      setEditing({
+                        ...editing,
+                        data: {
+                          ...editing.data,
+                          hostel_type: v,
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="boys">Boys</SelectItem>
+                      <SelectItem value="girls">Girls</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
+
+              {editing.type === "block" && (
+                <Input
+                  value={editing.data.block_name}
+                  onChange={(e) =>
+                    setEditing({
+                      ...editing,
+                      data: {
+                        ...editing.data,
+                        block_name: e.target.value,
+                      },
+                    })
+                  }
+                />
+              )}
+
+              {editing.type === "room" && (
+                <>
+                  <Input
+                    value={editing.data.room_no}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        data: {
+                          ...editing.data,
+                          room_no: e.target.value,
+                        },
+                      })
+                    }
+                  />
+
+                  <Input
+                    type="number"
+                    value={editing.data.capacity}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        data: {
+                          ...editing.data,
+                          capacity: Number(e.target.value),
+                        },
+                      })
+                    }
+                  />
+                </>
+              )}
+            </div>
+
+            <DrawerFooter>
+              <Button
+                onClick={() => {
+                  if (!editing) return;
+
+                  if (editing.type === "hostel") {
+                    updateHostel({
+                      id: editing.data._id,
+                      hostel_name: editing.data.hostel_name,
+                      hostel_type: editing.data.hostel_type,
+                    });
+                  }
+
+                  if (editing.type === "block") {
+                    updateBlock({
+                      id: editing.data._id,
+                      block_name: editing.data.block_name,
+                    });
+                  }
+
+                  if (editing.type === "room") {
+                    updateRoom({
+                      id: editing.data._id,
+                      room_no: editing.data.room_no,
+                      capacity: editing.data.capacity,
+                    });
+                  }
+
+                  setEditing(null);
+                }}
+              >
+                Save Changes
+              </Button>
+
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 }
 
-/* ================= BLOCK SECTION ================= */
+/* ========================================================= */
 
 function BlockSection({
   hostelId,
   createRoom,
+  deleteBlock,
+  deleteRoom,
+  updateBlock,
+  updateRoom,
   roomNos,
   capacities,
   setRoomNos,
   setCapacities,
+  setEditing,
 }: any) {
-  const blocks = useQuery(api.block.getBlocksByHostel, {
-    hostelId: hostelId,
-  });
+  const blocks = useQuery(api.block.getBlocksByHostel, { hostelId });
 
   if (!blocks?.length) return null;
 
   return (
     <div className="space-y-3">
       {blocks.map((block: any) => (
-        <div
-          key={block._id}
-          className="border rounded-md p-4 space-y-2"
-        >
-          <h3 className="font-semibold">Block {block.block_name}</h3>
+        <div key={block._id} className="border p-4 rounded-md space-y-2">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold">Block {block.block_name}</h3>
+
+            <div className="flex gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() =>
+                  setEditing({ type: "block", data: block })
+                }
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => deleteBlock({ id: block._id })}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          </div>
 
           <div className="flex gap-2">
             <Input
@@ -243,29 +441,57 @@ function BlockSection({
             </Button>
           </div>
 
-          <RoomList blockId={block._id} />
+          <RoomList
+            blockId={block._id}
+            deleteRoom={deleteRoom}
+            setEditing={setEditing}
+          />
         </div>
       ))}
     </div>
   );
 }
 
-/* ================= ROOM LIST ================= */
-
-function RoomList({ blockId }: { blockId: string }) {
+function RoomList({
+  blockId,
+  deleteRoom,
+  setEditing,
+}: any) {
   const rooms = useQuery(api.room.getRoomsByBlock, {
     block_id: blockId,
   });
 
+  if (!rooms?.length) return null;
+
   return (
     <div className="flex flex-wrap gap-2">
-      {rooms?.map((room) => (
-        <span
+      {rooms.map((room: any) => (
+        <div
           key={room._id}
-          className="px-3 py-1 border rounded text-sm"
+          className="flex items-center gap-2 border px-3 py-1 rounded"
         >
-          Room no.: {room.room_no} | Capacity: {room.capacity}
-        </span>
+          <span>
+            Room {room.room_no} · {room.capacity}
+          </span>
+
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() =>
+              setEditing({ type: "room", data: room })
+            }
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => deleteRoom({ id: room._id })}
+          >
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </div>
       ))}
     </div>
   );

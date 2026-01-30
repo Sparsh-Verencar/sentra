@@ -24,3 +24,24 @@ export const getRoomsByBlock = query({
       .collect();
   },
 });
+
+export const updateRoom = mutation({
+  args: {
+    id: v.id("room"),
+    room_no: v.string(),
+    capacity: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      room_no: args.room_no,
+      capacity: args.capacity,
+    });
+  },
+});
+
+export const deleteRoom = mutation({
+  args: { id: v.id("room") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});

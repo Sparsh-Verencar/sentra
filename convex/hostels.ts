@@ -31,3 +31,24 @@ export const getHostels = query({
     return await ctx.db.query("hostel").collect();
   },
 });
+
+export const updateHostel = mutation({
+  args: {
+    id: v.id("hostel"),
+    hostel_name: v.string(),
+    hostel_type: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      hostel_name: args.hostel_name,
+      hostel_type: args.hostel_type,
+    });
+  },
+});
+
+export const deleteHostel = mutation({
+  args: { id: v.id("hostel") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});
