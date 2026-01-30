@@ -102,6 +102,11 @@ export default function Onboarding_Roles() {
 
   const addStudent = useMutation(api.students.addStudent);
 
+  const currentCount = students?.length ?? 0;
+const roomCapacity = rooms?.find((r) => r._id === selectedRoom)?.capacity ?? 0;
+
+const isRoomFull = currentCount >= roomCapacity;
+
   const [studentOpen, setStudentOpen] = useState(false);
 
   const [fname, setFname] = useState("");
@@ -930,6 +935,7 @@ export default function Onboarding_Roles() {
                 </>
               )}
 
+
               {/* ---------------- STUDENTS TABLE ---------------- */}
               {selectedRoom && (
                 <>
@@ -955,10 +961,22 @@ export default function Onboarding_Roles() {
                     <h2 className="text-sm font-semibold">
                       Students in Room {selectedRoomNo}
                     </h2>
+<div className="text-sm text-muted-foreground">
+  Students: {currentCount} / {roomCapacity}
+</div>
+
+{isRoomFull && (
+  <p className="text-red-500 text-sm font-medium">
+    ❌ Room is full. Cannot add more students.
+  </p>
+)}
 
                     <Dialog open={studentOpen} onOpenChange={setStudentOpen}>
                       <DialogTrigger asChild>
-                        <Button>Add Student</Button>
+                       <Button disabled={isRoomFull}>
+  {isRoomFull ? "Room Full" : "Add Student"}
+</Button>
+
                       </DialogTrigger>
 
                       <DialogContent className="max-w-lg">
