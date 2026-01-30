@@ -22,7 +22,8 @@ export default defineSchema({
     address:v.string(),
     room_id:v.id("room"),
     student_password: v.string(),
-  }),
+    userId: v.id("users"),  
+  }).index("by_userId", ["userId"]),
  room: defineTable({
     room_no: v.string(),
     capacity: v.number(),

@@ -107,13 +107,23 @@ export default function Staff_and_Students_Login() {
 
   /* ---------------- STUDENT LOGIN ---------------- */
   const handleStudentLogin = async () => {
+  try {
     const res = await loginStudent({
       email: studentEmail,
       password: studentPassword,
     });
 
     alert(res.message);
-  };
+
+    // ✅ If login success → redirect
+    if (res.success) {
+      router.push("/Onboarding");
+    }
+  } catch (err: any) {
+    alert("Student login failed: " + err.message);
+  }
+};
+
 
   /* ---------------- STAFF LOGIN ---------------- */
   const handleStaffLogin = async () => {

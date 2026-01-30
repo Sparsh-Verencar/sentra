@@ -3,6 +3,7 @@
 import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { api} from "./_generated/api";
+import { getAuthUserId } from "@convex-dev/auth/server";
 /* ---------------- ADD STUDENT ---------------- */
 
 export const addStudent = mutation({
@@ -21,29 +22,35 @@ export const addStudent = mutation({
   },
 
   handler: async (ctx, args) => {
-    // ✅ Fetch room
+    // Get current auth user
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not authenticated");
+    }
+
+    // Fetch room
     const room = await ctx.db.get(args.roomId);
     if (!room) throw new Error("Room not found");
 
-    // ✅ Fetch block
+    // Fetch block
     const block = await ctx.db.get(room.block_id);
     if (!block) throw new Error("Block not found");
 
-    // ✅ Fetch hostel
+    // Fetch hostel
     const hostel = await ctx.db.get(block.hostel_id);
     if (!hostel) throw new Error("Hostel not found");
 
-    // ✅ Gender Validation
+    // Gender validation
     if (hostel.hostel_type === "Boys" && args.gender !== "male") {
       throw new Error("Boys hostel students must be Male");
     }
-
     if (hostel.hostel_type === "Girls" && args.gender !== "female") {
       throw new Error("Girls hostel students must be Female");
     }
 
     const gender = args.gender.toLowerCase() as "male" | "female";
-    // ✅ Insert Student
+
+    // Insert Student with userId
     await ctx.db.insert("student", {
       fname: args.fname,
       lname: args.lname,
@@ -56,6 +63,7 @@ export const addStudent = mutation({
       address: args.address,
       room_id: args.roomId,
       student_password: args.student_password,
+      userId, // link to Convex Auth user
     });
   },
 });
@@ -167,5 +175,18 @@ export const updateStudentDetails = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const getCurrentStudent = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return null;
+
+    return await ctx.db
+      .query("student")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
   },
 });
