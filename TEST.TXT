@@ -1,0 +1,127 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+export default function Onboarding() {
+  const createHostel = useMutation(api.hostels.createHostel);
+
+  const [boysHostel, setBoysHostel] = useState("");
+  const [girlsHostel, setGirlsHostel] = useState("");
+
+  const handleSave = async () => {
+    if (boysHostel) {
+      await createHostel({ name: boysHostel, type: "boys" });
+    }
+    if (girlsHostel) {
+      await createHostel({ name: girlsHostel, type: "girls" });
+    }
+  };
+
+  return (
+    <Tabs defaultValue="overview" className="w-[400px]">
+      <TabsList>
+        <TabsTrigger value="Hostel">Hostel</TabsTrigger>
+        <TabsTrigger value="Block">Blocks</TabsTrigger>
+        <TabsTrigger value="reports">Rooms</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="Hostel">
+        <Card>
+          <CardHeader>
+            <CardTitle>Enter Hostel Details</CardTitle>
+            <CardDescription className="space-y-4">
+              <div>
+                <Label htmlFor="boys">Boys Hostel</Label>
+                <Input
+                  id="boys"
+                  placeholder="Hostel name"
+                  value={boysHostel}
+                  onChange={(e) => setBoysHostel(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="girls">Girls Hostel</Label>
+                <Input
+                  id="girls"
+                  placeholder="Hostel name"
+                  value={girlsHostel}
+                  onChange={(e) => setGirlsHostel(e.target.value)}
+                />
+              </div>
+
+              <Button onClick={handleSave}>Save Hostels</Button>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="Block">
+        <Card>
+          <CardHeader>
+            <CardTitle>Enter Block Details</CardTitle>
+            <CardDescription className="space-y-4">
+              <div>
+                <Label htmlFor="boys">Select Hostel</Label>
+                <Dialog>
+  <DialogTrigger>Open</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Select the Hostel</DialogTitle>
+      <DialogDescription>
+
+      </DialogDescription>
+    </DialogHeader>
+  </DialogContent>
+</Dialog>
+                <Input
+                  id="boys"
+                  placeholder="Hostel name"
+                  value={boysHostel}
+                  onChange={(e) => setBoysHostel(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="girls">Girls Hostel</Label>
+                <Input
+                  id="girls"
+                  placeholder="Hostel name"
+                  value={girlsHostel}
+                  onChange={(e) => setGirlsHostel(e.target.value)}
+                />
+              </div>
+
+              <Button onClick={handleSave}>Save Hostels</Button>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
