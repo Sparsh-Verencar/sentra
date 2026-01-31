@@ -53,7 +53,9 @@ export default function Onboardingcontent() {
   const addBlock = useMutation(api.block.createBlock);
 
   const hostelTypes = useQuery(api.hostels.getHostelTypes);
+  const hostels = useQuery(api.hostels.getHostels);
   const blocks = useQuery(api.block.getBlocks);
+  
 
   const [boysHostel, setBoysHostel] = useState("");
   const [girlsHostel, setGirlsHostel] = useState("");
@@ -68,10 +70,10 @@ export default function Onboardingcontent() {
 
   const handleSave = async () => {
     if (boysHostel) {
-      await createHostel({ name: boysHostel, type: "boys" });
+      await createHostel({ hostel_name: boysHostel, hostel_type: "boys" });
     }
     if (girlsHostel) {
-      await createHostel({ name: girlsHostel, type: "girls" });
+      await createHostel({ hostel_name: girlsHostel, hostel_type: "girls" });
     }
     setBoysHostel("");
     setGirlsHostel("");
@@ -225,22 +227,22 @@ export default function Onboardingcontent() {
                 </div>
 
                 {/* Display existing hostels */}
-                {hostelTypes && hostelTypes.length > 0 && (
+                {hostels && hostels.length > 0 && (
                   <div className="mt-8 pt-6 border-t border-zinc-800">
                     <h4 className="text-sm font-semibold text-zinc-300 mb-4">
                       Existing Hostels
                     </h4>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {hostelTypes.map((hostel) => (
+                      {hostels.map((hostel) => (
                         <div
                           key={hostel._id.toString()}
                           className="p-4 rounded-lg border border-zinc-800 bg-zinc-800/50"
                         >
-                          <div className="font-medium text-white capitalize">
-                            {hostel.hostel_type}
-                          </div>
-                          <div className="text-sm text-zinc-400 mt-1">
+                          <div className="text-lg text-white mt-1 capitalize">
                             {hostel.hostel_name}
+                          </div>
+                          <div className="font-medium  text-zinc-400">
+                            {hostel.hostel_type}
                           </div>
                         </div>
                       ))}

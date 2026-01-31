@@ -22,6 +22,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { BarChart3, Book, Brain, Camera, FileText, GraduationCapIcon, Megaphone, UniversityIcon, User2 } from "lucide-react"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
 
 const data = {
   user: {
@@ -37,7 +39,7 @@ const data = {
     },
     {
       title: "Complaints",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/complaints",
       icon: Book,
     },
     {
@@ -128,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold"></span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

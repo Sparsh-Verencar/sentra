@@ -141,7 +141,7 @@ export default function Staff_and_Students_Login() {
       flow: "signIn",
     });
 
-    router.push("/Onboarding");
+    router.push("/admin-dashboard");
   } catch (err: any) {
     alert("Login failed: " + err.message);
   }
