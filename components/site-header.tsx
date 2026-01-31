@@ -6,6 +6,7 @@ import { ModeToggle } from "./mode-toggle"
 import { usePathname } from "next/navigation"
 import { useAuthActions } from "@convex-dev/auth/react"
 import { useRouter } from "next/navigation"
+import {  LogOut } from "lucide-react";
 export function SiteHeader() {
   const router = useRouter()
   const path = usePathname()
@@ -16,6 +17,10 @@ export function SiteHeader() {
     router.push("/sign-in")
     
   }
+  const handleAdminLogout = async () => {
+    await signOut();
+    router.push("/Staff_and_Students_Login");
+  };
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -41,6 +46,14 @@ export function SiteHeader() {
               GitHub
             </a>
           </Button>
+           <Button 
+                          variant="destructive" 
+                          onClick={handleAdminLogout}
+                          className="self-start sm:self-center bg-red-600 hover:bg-red-700"
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Logout
+                        </Button>
         </div>
       </div>
     </header>
