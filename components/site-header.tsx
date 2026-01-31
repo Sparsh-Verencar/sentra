@@ -6,16 +6,16 @@ import { ModeToggle } from "./mode-toggle"
 import { usePathname } from "next/navigation"
 import { useAuthActions } from "@convex-dev/auth/react"
 import { useRouter } from "next/navigation"
-import {  LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 export function SiteHeader() {
   const router = useRouter()
   const path = usePathname()
   const headerPath = path.split("/").at(-1)
   const { signOut } = useAuthActions();
-  const signout = async()=>{
+  const signout = async () => {
     signOut()
     router.push("/sign-in")
-    
+
   }
   const handleAdminLogout = async () => {
     await signOut();
@@ -29,8 +29,8 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <ModeToggle/>
-        <Separator  
+        <ModeToggle />
+        <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
@@ -46,14 +46,14 @@ export function SiteHeader() {
               GitHub
             </a>
           </Button>
-           <Button 
-                          variant="destructive" 
-                          onClick={handleAdminLogout}
-                          className="self-start sm:self-center bg-red-600 hover:bg-red-700"
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Logout
-                        </Button>
+          <Button
+            variant="destructive"
+            onClick={handleAdminLogout}
+            className="self-start sm:self-center bg-red-600 hover:bg-red-700"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </div>
     </header>
