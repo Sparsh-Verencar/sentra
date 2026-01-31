@@ -34,37 +34,17 @@ const data = {
   navMain: [
     {
       title: "Announcements",
-      url: "/admin-dashboard/announcements",
+      url: "/staff-dashboard/announcements",
       icon: Megaphone,
     },
     {
       title: "Complaints",
-      url: "/admin-dashboard/complaints",
+      url: "/staff-dashboard/complaints",
       icon: Book,
     },
     {
-      title: "Staff",
-      url: "/admin-dashboard/staff",
-      icon: User2,
-    },
-    {
-      title: "Students",
-      url: "/admin-dashboard/add-student",
-      icon: GraduationCapIcon,
-    },
-    {
-      title: "Hostel structure",
-      url: "/admin-dashboard/hostel-structure",
-      icon: UniversityIcon,
-    },
-    {
-      title: "Analytics",
-      url: "/admin-dashboard/analytics",
-      icon: BarChart3,
-    },
-    {
       title: "Account",
-      url: "/admin-dashboard/admin-id",
+      url: "/staff-dashboard/staff-id",
       icon: User2 ,
     },
   ],
@@ -118,7 +98,7 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function StaffAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

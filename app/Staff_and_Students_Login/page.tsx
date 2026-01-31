@@ -116,15 +116,28 @@ export default function Staff_and_Students_Login() {
 };
 
 
-  /* ---------------- STAFF LOGIN ---------------- */
-  const handleStaffLogin = async () => {
+/* ---------------- STAFF LOGIN ---------------- */
+/* ---------------- STAFF LOGIN ---------------- */
+const handleStaffLogin = async () => {
+  try {
     const res = await loginStaff({
       email: staffEmail,
       password: staffPassword,
     });
 
-    alert(res.message);
-  };
+    // Check if login was successful
+    if (res.success) {
+      alert(res.message); // optional success message
+      router.push("/staff-dashboard");
+    } else {
+      alert("Login failed: " + res.message);
+      // Do not route
+    }
+  } catch (err: any) {
+    alert("Login failed: " + err.message);
+  }
+};
+
 
   /* ---------------- ADMIN SIGNUP ---------------- */
  

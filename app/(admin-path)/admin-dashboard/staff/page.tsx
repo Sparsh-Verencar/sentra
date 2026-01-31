@@ -53,6 +53,7 @@ type Staff = {
   address: string
   hostel_id: string
   role_id: string
+  staff_password: string
 }
 
 type Role = {
@@ -78,18 +79,14 @@ const StaffCard = ({
 }) => (
   <Card className="w-60 border shadow-sm">
     <CardHeader className="flex flex-col items-center gap-1 bg-muted p-2 rounded-t-md">
-      {/* Icon Avatar */}
       <div className="rounded-full bg-secondary p-3">
         <UserIcon className="h-8 w-8 text-white" />
       </div>
-
-      {/* Name */}
       <CardTitle className="text-base font-semibold text-center">
         {staff.fname} {staff.lname}
       </CardTitle>
     </CardHeader>
 
-    {/* Card Info */}
     <div className="p-3 space-y-1 text-sm text-muted-foreground">
       <div className="flex justify-between">
         <span className="font-medium">Email:</span>
@@ -111,26 +108,16 @@ const StaffCard = ({
       </div>
     </div>
 
-    {/* Actions */}
     <div className="flex justify-between p-3 border-t pt-2">
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => onEdit(staff)}
-      >
+      <Button size="sm" variant="outline" onClick={() => onEdit(staff)}>
         <EditIcon className="h-4 w-4 mr-1" /> Edit
       </Button>
-      <Button
-        size="sm"
-        variant="destructive"
-        onClick={() => onDelete(staff._id)}
-      >
+      <Button size="sm" variant="destructive" onClick={() => onDelete(staff._id)}>
         <TrashIcon className="h-4 w-4 mr-1" /> Delete
       </Button>
     </div>
   </Card>
 )
-
 
 export default function StaffPage() {
   const staffData = useQuery(api.staff.getAllStaff) ?? []
@@ -154,6 +141,7 @@ export default function StaffPage() {
       address: "",
       role_id: "",
       hostel_id: "",
+      staff_password: "",
     },
     mode: "onChange",
   })
@@ -168,6 +156,7 @@ export default function StaffPage() {
       address: "",
       role_id: "",
       hostel_id: "",
+      staff_password: "",
     })
     setEditingStaff(null)
     setDrawerOpen(true)
@@ -183,6 +172,7 @@ export default function StaffPage() {
       address: staff.address,
       role_id: staff.role_id,
       hostel_id: staff.hostel_id,
+      staff_password: staff.staff_password,
     })
     setEditingStaff(staff)
     setDrawerOpen(true)
@@ -192,10 +182,14 @@ export default function StaffPage() {
     const payload = {
       ...data,
       phone: Number(data.phone),
+      staff_password: data.staff_password, // admin-assigned password
     }
 
     if (editingStaff) {
-      await updateStaff({ id: editingStaff._id, ...payload })
+      await updateStaff({
+        id: editingStaff._id,
+        ...payload,
+      })
     } else {
       await createStaff(payload)
     }
@@ -215,19 +209,15 @@ export default function StaffPage() {
   const staffByRole: Record<string, Staff[]> = {}
   roles.forEach((role: Role) => {
     staffByRole[role._id] =
-      (staffData as Staff[]).filter((s: Staff) => s.role_id === role._id) ??
-      []
+      (staffData as Staff[]).filter((s: Staff) => s.role_id === role._id) ?? []
   })
 
   return (
     <div className="p-6 space-y-8">
-
-      {/* ADD NEW STAFF BUTTON */}
       <div className="flex justify-start">
         <Button onClick={openCreate}>Add Staff</Button>
       </div>
 
-      {/* GROUPED STAFF SECTIONS */}
       {roles.map((role: Role) => (
         <div key={role._id}>
           <h2 className="text-lg font-semibold mb-2">{role.role_name}</h2>
@@ -236,9 +226,7 @@ export default function StaffPage() {
               <StaffCard
                 key={s._id}
                 staff={s}
-                hostelName={
-                  hostels.find((h) => h._id === s.hostel_id)?.hostel_name
-                }
+                hostelName={hostels.find((h) => h._id === s.hostel_id)?.hostel_name}
                 onEdit={openEdit}
                 onDelete={handleDelete}
               />
@@ -247,49 +235,26 @@ export default function StaffPage() {
         </div>
       ))}
 
-      {/* ADD / EDIT STAFF DRAWER */}
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        direction="right"
-      >
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="right">
         <DrawerTrigger hidden />
-
         <DrawerContent className="overflow-y-auto h-full">
           <DrawerHeader>
-            <DrawerTitle>
-              {editingStaff ? "Edit Staff" : "Add New Staff"}
-            </DrawerTitle>
-            <DrawerDescription>
-              Fill in the details below
-            </DrawerDescription>
+            <DrawerTitle>{editingStaff ? "Edit Staff" : "Add New Staff"}</DrawerTitle>
+            <DrawerDescription>Fill in the details below</DrawerDescription>
           </DrawerHeader>
 
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="px-4 pb-4 space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 pb-4 space-y-4">
             <FieldSet>
-
-              {/* FIRST NAME */}
               <Field>
                 <FieldLabel htmlFor="fname">First Name</FieldLabel>
-                <Input
-                  {...form.register("fname", { required: true })}
-                  id="fname"
-                />
+                <Input {...form.register("fname", { required: true })} id="fname" />
               </Field>
 
-              {/* LAST NAME */}
               <Field>
                 <FieldLabel htmlFor="lname">Last Name</FieldLabel>
-                <Input
-                  {...form.register("lname", { required: true })}
-                  id="lname"
-                />
+                <Input {...form.register("lname", { required: true })} id="lname" />
               </Field>
 
-              {/* GENDER */}
               <Field>
                 <FieldLabel>Gender</FieldLabel>
                 <Controller
@@ -297,10 +262,7 @@ export default function StaffPage() {
                   name="gender"
                   rules={{ required: "Please select a gender" }}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -314,33 +276,32 @@ export default function StaffPage() {
                 />
               </Field>
 
-              {/* PHONE */}
               <Field>
                 <FieldLabel htmlFor="phone">Phone</FieldLabel>
-                <Input
-                  {...form.register("phone", { required: true })}
-                  id="phone"
-                  type="tel"
-                />
+                <Input {...form.register("phone", { required: true })} id="phone" type="tel" />
               </Field>
 
-              {/* EMAIL */}
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  {...form.register("email", { required: true })}
-                  id="email"
-                  type="email"
-                />
+                <Input {...form.register("email", { required: true })} id="email" type="email" />
               </Field>
 
-              {/* ADDRESS */}
               <Field>
                 <FieldLabel htmlFor="address">Address</FieldLabel>
                 <Input {...form.register("address")} id="address" />
               </Field>
 
-              {/* ROLE */}
+              {/* PASSWORD FIELD */}
+              <Field>
+                <FieldLabel htmlFor="staff_password">Password</FieldLabel>
+                <Input
+                  {...form.register("staff_password", { required: true })}
+                  id="staff_password"
+                  type="password"
+                  placeholder="Assign a password"
+                />
+              </Field>
+
               <Field>
                 <FieldLabel>Role</FieldLabel>
                 <Controller
@@ -348,10 +309,7 @@ export default function StaffPage() {
                   name="role_id"
                   rules={{ required: "Please select a role" }}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
@@ -367,7 +325,6 @@ export default function StaffPage() {
                 />
               </Field>
 
-              {/* HOSTEL */}
               <Field>
                 <FieldLabel>Hostel</FieldLabel>
                 <Controller
@@ -375,10 +332,7 @@ export default function StaffPage() {
                   name="hostel_id"
                   rules={{ required: "Please select a hostel" }}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select hostel" />
                       </SelectTrigger>
@@ -393,13 +347,10 @@ export default function StaffPage() {
                   )}
                 />
               </Field>
-
             </FieldSet>
 
             <DrawerFooter className="flex gap-2">
-              <Button type="submit">
-                {editingStaff ? "Update" : "Save"}
-              </Button>
+              <Button type="submit">{editingStaff ? "Update" : "Save"}</Button>
               <DrawerClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DrawerClose>
@@ -407,7 +358,6 @@ export default function StaffPage() {
           </form>
         </DrawerContent>
       </Drawer>
-
     </div>
   )
 }

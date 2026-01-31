@@ -144,39 +144,21 @@ export const loginStaff = action({
     email: v.string(),
     password: v.string(),
   },
-
   handler: async (ctx, args) => {
-    // 1. Load staff via query from the action
+    // 1. Find staff by email
     const staff = await ctx.runQuery(api.staff.getByEmail, {
       email: args.email,
     });
 
     if (!staff) {
-      return {
-        success: false,
-        message: "Staff not found",
-      };
+      return { success: false, message: "Staff not found" };
     }
 
-    // 2. Compare password via Node action
-    const match = await ctx.runAction(
-      api.authActions.comparePassword,
-      {
-        password: args.password,
-        hashedPassword: staff.staff_password,
-      },
-    );
-
-    if (!match) {
-      return {
-        success: false,
-        message: "Invalid password",
-      };
+    // 2. Compare passwords directly (no hash)
+    if (staff.staff_password !== args.password) {
+      return { success: false, message: "Invalid password" };
     }
 
-    return {
-      success: true,
-      message: "Staff login successful ✅",
-    };
+    return { success: true, message: "Staff login successful ✅" };
   },
 });
