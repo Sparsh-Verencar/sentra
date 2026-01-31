@@ -33,3 +33,22 @@ export const getBlocksByHostel = query({
       .collect();
   },
 });
+
+export const updateBlock = mutation({
+  args: {
+    id: v.id("block"),
+    block_name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      block_name: args.block_name,
+    });
+  },
+});
+
+export const deleteBlock = mutation({
+  args: { id: v.id("block") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});

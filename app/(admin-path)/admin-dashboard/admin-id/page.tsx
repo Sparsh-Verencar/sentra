@@ -16,6 +16,7 @@ import { skip } from "node:test"
 
 export default function AdminId() {
   const admin = useQuery(api.admin.getCurrentAdmin, {});
+  console.log(`frontend admin:${admin}`)
   if (admin === undefined) {
     // still loading
     return <div>Loading...</div>;

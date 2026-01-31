@@ -1,8 +1,6 @@
-
-
 import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
-import { api} from "./_generated/api";
+import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { createAccount } from "@convex-dev/auth/server";
 import { internalMutation } from "./_generated/server";
@@ -36,10 +34,11 @@ export const addStudentInternal = internalMutation({
     if (!hostel) throw new Error("Hostel not found");
 
     if (hostel.hostel_type === "Boys" && args.gender !== "male") {
-      throw new Error("Boys hostel students must be Male");
+      throw new Error("Boys hostel allows only male students");
     }
+
     if (hostel.hostel_type === "Girls" && args.gender !== "female") {
-      throw new Error("Girls hostel students must be Female");
+      throw new Error("Girls hostel allows only female students");
     }
 
     await ctx.db.insert("student", {
@@ -97,34 +96,43 @@ export const addStudent = action({
   },
 });
 
-
-/* ---------------- GET STUDENTS BY ROOM ---------------- */
+/* ======================================================
+   GET STUDENTS BY ROOM
+====================================================== */
 
 export const getStudentsByRoom = query({
   args: {
     roomId: v.id("room"),
   },
-
   handler: async (ctx, args) => {
     return await ctx.db
       .query("student")
-      .filter((q) => q.eq(q.field("room_id"), args.roomId))
+      .filter((q) =>
+        q.eq(q.field("room_id"), args.roomId)
+      )
       .collect();
   },
 });
+
+/* ======================================================
+   GET STUDENT BY EMAIL
+====================================================== */
+
 export const getByEmail = query({
-  args: {
-    email: v.string(),
-  },
+  args: { email: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("student")
-      .filter((q) => q.eq(q.field("email"), args.email))
+      .filter((q) =>
+        q.eq(q.field("email"), args.email)
+      )
       .first();
   },
 });
-/* ---------------- LOGIN STUDENT (MUTATION) ---------------- */
 
+/* ======================================================
+   STUDENT LOGIN
+====================================================== */
 
 export const loginStudent = action({
   args: {
@@ -139,31 +147,24 @@ export const loginStudent = action({
     });
 
     if (!student) {
-      return {
-        success: false,
-        message: "student not found",
-      };
+      return { success: false, message: "Student not found" };
     }
 
-    // 2. Compare password via Node action
     const match = await ctx.runAction(
       api.authActions.comparePassword,
       {
         password: args.password,
         hashedPassword: student.student_password,
-      },
+      }
     );
 
     if (!match) {
-      return {
-        success: false,
-        message: "Invalid password",
-      };
+      return { success: false, message: "Invalid password" };
     }
 
     return {
       success: true,
-      message: "Staff login successful ✅",
+      message: "Student login successful ✅",
     };
   },
 });
@@ -239,8 +240,6 @@ export const deleteStudent = mutation({
 export const updateStudentDetails = mutation({
   args: {
     studentId: v.id("student"),
-
-    // ✅ Allowed editable fields only
     fname: v.string(),
     lname: v.string(),
     date_of_birth: v.string(),
@@ -265,6 +264,10 @@ export const updateStudentDetails = mutation({
   },
 });
 
+/* ======================================================
+   CURRENT LOGGED-IN STUDENT
+====================================================== */
+
 export const getCurrentStudent = query({
   args: {},
   handler: async (ctx) => {
@@ -273,7 +276,93 @@ export const getCurrentStudent = query({
 
     return await ctx.db
       .query("student")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) =>
+        q.eq("userId", userId)
+      )
       .first();
+  },
+});
+
+/* ======================================================
+   ROOM OCCUPANCY COUNTS
+====================================================== */
+
+export const getStudentCountByRooms = query({
+  args: {
+    blockId: v.id("block"),
+  },
+
+  handler: async (ctx, args) => {
+    const rooms = await ctx.db
+      .query("room")
+      .withIndex("by_block", (q) =>
+        q.eq("block_id", args.blockId)
+      )
+      .collect();
+
+    const counts: Record<string, number> = {};
+
+    for (const room of rooms) {
+      const students = await ctx.db
+        .query("student")
+        .filter((q) =>
+          q.eq(q.field("room_id"), room._id)
+        )
+        .collect();
+
+      counts[room._id] = students.length;
+    }
+
+    return counts;
+  },
+});
+
+/* ======================================================
+   TRANSFER STUDENT ROOM
+====================================================== */
+
+export const transferStudentRoom = mutation({
+  args: {
+    studentId: v.id("student"),
+    newRoomId: v.id("room"),
+  },
+
+  handler: async (ctx, args) => {
+    const student = await ctx.db.get(args.studentId);
+    if (!student) throw new Error("Student not found");
+
+    const room = await ctx.db.get(args.newRoomId);
+    if (!room) throw new Error("Room not found");
+
+    const block = await ctx.db.get(room.block_id);
+    if (!block) throw new Error("Block not found");
+
+    const hostel = await ctx.db.get(block.hostel_id);
+    if (!hostel) throw new Error("Hostel not found");
+
+    if (hostel.hostel_type === "Boys" && student.gender !== "male") {
+      throw new Error("Cannot move female student to boys hostel");
+    }
+
+    if (hostel.hostel_type === "Girls" && student.gender !== "female") {
+      throw new Error("Cannot move male student to girls hostel");
+    }
+
+    const studentsInRoom = await ctx.db
+      .query("student")
+      .filter((q) =>
+        q.eq(q.field("room_id"), args.newRoomId)
+      )
+      .collect();
+
+    if (studentsInRoom.length >= room.capacity) {
+      throw new Error("Target room is full");
+    }
+
+    await ctx.db.patch(args.studentId, {
+      room_id: args.newRoomId,
+    });
+
+    return { success: true };
   },
 });

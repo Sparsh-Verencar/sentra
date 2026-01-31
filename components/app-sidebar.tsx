@@ -47,12 +47,12 @@ const data = {
     },
     {
       title: "Students",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/add-student",
       icon: GraduationCapIcon,
     },
     {
       title: "Hostel structure",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/hostel-structure",
       icon: UniversityIcon,
     },
     {
