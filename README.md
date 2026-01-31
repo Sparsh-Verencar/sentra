@@ -53,3 +53,5 @@ Managing hostels manually is inefficient and error-prone. This system digitizes 
 <img width="2518" height="1182" alt="image" src="https://github.com/user-attachments/assets/8085e95c-02ec-4bd3-8fff-eb3310ffaed9" />
 <img width="2559" height="1177" alt="image" src="https://github.com/user-attachments/assets/3984baf3-1bc1-482c-9d08-d3facbd3183f" />
 <img width="2559" height="1176" alt="image" src="https://github.com/user-attachments/assets/6537343e-c47a-4ac5-a130-cd357d293137" />
+<img width="1914" height="897" alt="image" src="https://github.com/user-attachments/assets/5d8538f1-cc4f-4e7a-8ed5-bb1052e41877" />
+
