@@ -1,46 +1,40 @@
-# Welcome to your Convex + Next.js + Convex Auth app
+## 🏨 Hostel Management System
 
-This is a [Convex](https://convex.dev/) project created with [`npm create convex`](https://www.npmjs.com/package/create-convex).
+A full-stack web application built to simplify hostel operations — covering student records, room allocation, complaints, announcements, and lost & found.
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+### Why this?
+Managing hostels manually is inefficient and error-prone. This system digitizes the workflow with clear role-based access for **students, staff, and admins**, making management smoother and more transparent.
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Convex Auth](https://labs.convex.dev/auth) for authentication
+### What it does
 
-## Get started
+#### 👨‍🎓 Students
+- View student info  
+- Raise and track complaints  
+- Report lost items and claim found ones  
+- View hostel announcements  
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
+#### 🧑‍💼 Staff
+- Resolve student complaints  
+- Post announcements  
+- Manage hostel blocks and rooms  
 
-```
-npm install
-npm run dev
-```
+#### 🛠️ Admin
+- Handle onboarding of students and staff  
+- Manage hostels, blocks, rooms, and roles  
+- System-wide oversight with an **admin analytics dashboard**  
 
-If you're reading this README on GitHub and want to use this template, run:
+### 🧱 Tech Stack
+- **Frontend:** Next.js (App Router), shadcn/ui, Tailwind CSS  
+- **Backend & Database:** Convex  
 
-```
-npm create convex@latest -- -t nextjs-convexauth
-```
+### ✨ Core Features
+- Role-based access and permissions  
+- Relational database schema with indexed queries  
+- Complaint system with status and resolution history  
+- Announcements and lost & found module with image support  
 
-## Learn more
-
-To learn more about developing your project with Convex, check out:
-
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
-- [Convex Auth docs](https://labs.convex.dev/auth) for documentation on the Convex Auth library.
-
-## Configuring other authentication methods
-
-To configure different authentication methods, see [Configuration](https://labs.convex.dev/auth/config) in the Convex Auth docs.
-
-## Join the community
-
-Join thousands of developers building full-stack apps with Convex:
-
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+### 🚀 Future Plans
+- In-app messaging  
+- Real-time notifications  
+- Mobile responsiveness improvements  
+- AI-based complaint categorization  
