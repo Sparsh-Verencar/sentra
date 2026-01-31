@@ -75,7 +75,7 @@ export default function Staff_and_Students_Login() {
       try {
         await signupAdminRecord(pendingAdminSignup);
         setPendingAdminSignup(null);
-        router.push("/Onboarding_roles");
+        router.push("/Onboarding_Roles");
       } catch (err: any) {
         alert("Signup failed: " + err.message);
         setPendingAdminSignup(null);
