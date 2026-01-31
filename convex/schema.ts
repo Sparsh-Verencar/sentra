@@ -14,45 +14,60 @@ export default defineSchema({
     fname:v.string(),
     lname:v.string(),
     date_of_birth:v.string(),
-    gender:v.string(),
+    gender: v.union(v.literal("male"), v.literal("female")),
     dept_name:v.string(),
     year_of_study:v.string(),
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    room_id:v.id("room")
-  }),
-  room:defineTable({
-    room_no:v.string(),
-    capacity:v.number(),
-    block_id:v.id("block"),
-  }),
-  block:defineTable({
-    block_name:v.string(),
-    hostel_id:v.id("hostel"),
-  }),
+    room_id:v.id("room"),
+    student_password: v.string(),
+    userId: v.id("users"),  
+  }).index("by_userId", ["userId"]),
+ room: defineTable({
+    room_no: v.string(),
+    capacity: v.number(),
+    block_id: v.id("block"),
+  }).index("by_block", ["block_id"]),
+  block: defineTable({
+    block_name: v.string(),
+    hostel_id: v.id("hostel"),
+  }).index("by_hostel", ["hostel_id"]),
   hostel:defineTable({
     hostel_name:v.string(),
     hostel_type:v.string(),
   }),
   management_staff:defineTable({
     hostel_id:v.id("hostel"),
-    role:v.string(),
     fname:v.string(),
     lname:v.string(),
     gender:v.string(),
     phone:v.number(),
     email:v.string(),
     address:v.string(),
-    role_id:v.id("role")
+    role_id:v.id("role"),
+    staff_password: v.string(),
   }),
-  announcement:defineTable({
-    staff_id:v.id("management_staff"),
-    title:v.string(),
-    description:v.string(),
-    tags:v.string(),
-    date:v.string( ),
+
+  organisation:defineTable({ 
+    organisation_name:v.string(),
   }),
+
+// schema.ts
+admin: defineTable({
+  userId: v.id("users"),              // <— instead of tokenIdentifier
+  admin_name: v.string(),
+  email: v.string(),
+  organisation_id: v.id("organisation"),
+  password_hash: v.string(),
+}).index("by_userId", ["userId"]),
+announcement: defineTable({
+  userId: v.id("users"),   // creator (admin or staff)
+  title: v.string(),
+  description: v.string(),
+  tags: v.string(),
+  date: v.string(),
+}),
   role:defineTable({
     role_name:v.string(),
     permission_id:v.id("permissions"),
@@ -60,13 +75,20 @@ export default defineSchema({
   permissions:defineTable({
     permission:v.string(),
   }),
-  complaint:defineTable({
-    complaint_type:v.string(),
-    description:v.string(),
-    priority:v.string(),
-    status:v.string(),
-    visibility:v.string(),
-  }),
+complaint: defineTable({
+  complaint_type: v.string(),
+  description: v.string(),
+  priority: v.string(),
+  status: v.union(
+    v.literal("issued"),
+    v.literal("in_progress"),
+    v.literal("completed")
+  ),
+  visibility: v.union(
+    v.literal("private"),
+    v.literal("public"),
+  ),
+}),
   resolves: defineTable({
   complaint_id: v.id("complaint"),
   staff_id: v.id("management_staff"),
@@ -85,6 +107,7 @@ export default defineSchema({
     item_name:v.string(),
     description:v.string(),
     status:v.string(),
+    image_id: v.optional(v.id("_storage")),
   }),
   found:defineTable({
     student_id:v.id("student"),
@@ -96,4 +119,12 @@ export default defineSchema({
     item_id:v.id("lost_item"),
     lost_date:v.string(),
   }),
+  message: defineTable({
+  content: v.string(),
+  created_at: v.string(),
+  item_id: v.id("lost_item"),
+  student_id: v.id("student"),
+})
+  .index("by_item", ["item_id"])
+  .index("by_student", ["student_id"]),
 });
