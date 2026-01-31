@@ -75,13 +75,20 @@ announcement: defineTable({
   permissions:defineTable({
     permission:v.string(),
   }),
-  complaint:defineTable({
-    complaint_type:v.string(),
-    description:v.string(),
-    priority:v.string(),
-    status:v.string(),
-    visibility:v.string(),
-  }),
+complaint: defineTable({
+  complaint_type: v.string(),
+  description: v.string(),
+  priority: v.string(),
+  status: v.union(
+    v.literal("issued"),
+    v.literal("in_progress"),
+    v.literal("completed")
+  ),
+  visibility: v.union(
+    v.literal("private"),
+    v.literal("public"),
+  ),
+}),
   resolves: defineTable({
   complaint_id: v.id("complaint"),
   staff_id: v.id("management_staff"),
