@@ -59,7 +59,7 @@ const data = {
     },
     {
       title: "Analytics",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/analytics",
       icon: BarChart3,
     },
     {
