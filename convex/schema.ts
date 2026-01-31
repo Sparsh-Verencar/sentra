@@ -100,6 +100,7 @@ announcement: defineTable({
     item_name:v.string(),
     description:v.string(),
     status:v.string(),
+    image_id: v.optional(v.id("_storage")),
   }),
   found:defineTable({
     student_id:v.id("student"),
@@ -111,4 +112,12 @@ announcement: defineTable({
     item_id:v.id("lost_item"),
     lost_date:v.string(),
   }),
+  message: defineTable({
+  content: v.string(),
+  created_at: v.string(),
+  item_id: v.id("lost_item"),
+  student_id: v.id("student"),
+})
+  .index("by_item", ["item_id"])
+  .index("by_student", ["student_id"]),
 });
