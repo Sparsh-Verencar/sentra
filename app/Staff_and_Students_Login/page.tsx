@@ -75,7 +75,7 @@ export default function Staff_and_Students_Login() {
       try {
         await signupAdminRecord(pendingAdminSignup);
         setPendingAdminSignup(null);
-        router.push("/Onboarding_Roles");
+        router.push("/Onboarding");
       } catch (err: any) {
         alert("Signup failed: " + err.message);
         setPendingAdminSignup(null);
@@ -112,7 +112,7 @@ export default function Staff_and_Students_Login() {
     password: studentPassword,
     flow: "signIn",
   });
-  router.push("/StudentInfo");
+  router.push("/student-dashboard");
 };
 
 
