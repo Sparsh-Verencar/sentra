@@ -4,9 +4,62 @@ import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { api} from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { createAccount } from "@convex-dev/auth/server";
+import { internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 /* ---------------- ADD STUDENT ---------------- */
 
-export const addStudent = mutation({
+export const addStudentInternal = internalMutation({
+  args: {
+    // same args as before, plus userId from createAccount
+    fname: v.string(),
+    lname: v.string(),
+    date_of_birth: v.string(),
+    gender: v.union(v.literal("male"), v.literal("female")),
+    dept_name: v.string(),
+    year_of_study: v.string(),
+    phone: v.number(),
+    email: v.string(),
+    address: v.string(),
+    roomId: v.id("room"),
+    student_password: v.string(),
+    userId: v.id("users"), // or whatever your users table is
+  },
+  handler: async (ctx, args) => {
+    const room = await ctx.db.get(args.roomId);
+    if (!room) throw new Error("Room not found");
+
+    const block = await ctx.db.get(room.block_id);
+    if (!block) throw new Error("Block not found");
+
+    const hostel = await ctx.db.get(block.hostel_id);
+    if (!hostel) throw new Error("Hostel not found");
+
+    if (hostel.hostel_type === "Boys" && args.gender !== "male") {
+      throw new Error("Boys hostel students must be Male");
+    }
+    if (hostel.hostel_type === "Girls" && args.gender !== "female") {
+      throw new Error("Girls hostel students must be Female");
+    }
+
+    await ctx.db.insert("student", {
+      fname: args.fname,
+      lname: args.lname,
+      date_of_birth: args.date_of_birth,
+      gender: args.gender,
+      dept_name: args.dept_name,
+      year_of_study: args.year_of_study,
+      phone: args.phone,
+      email: args.email,
+      address: args.address,
+      room_id: args.roomId,
+      student_password: args.student_password,
+      userId: args.userId,
+    });
+  },
+});
+
+export const addStudent = action({
   args: {
     fname: v.string(),
     lname: v.string(),
@@ -20,50 +73,26 @@ export const addStudent = mutation({
     roomId: v.id("room"),
     student_password: v.string(),
   },
-
   handler: async (ctx, args) => {
-    // Get current auth user
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) {
-      throw new Error("Not authenticated");
-    }
+    const adminId = await getAuthUserId(ctx);
+    if (!adminId) throw new Error("Admin not authenticated");
 
-    // Fetch room
-    const room = await ctx.db.get(args.roomId);
-    if (!room) throw new Error("Room not found");
+    const result = await createAccount(ctx, {
+      provider: "password",
+      account: {
+        id: args.email,
+        secret: args.student_password,
+      },
+      profile: {
+        email: args.email,
+      },
+    });
 
-    // Fetch block
-    const block = await ctx.db.get(room.block_id);
-    if (!block) throw new Error("Block not found");
+    const studentUserId = result.user._id;
 
-    // Fetch hostel
-    const hostel = await ctx.db.get(block.hostel_id);
-    if (!hostel) throw new Error("Hostel not found");
-
-    // Gender validation
-    if (hostel.hostel_type === "Boys" && args.gender !== "male") {
-      throw new Error("Boys hostel students must be Male");
-    }
-    if (hostel.hostel_type === "Girls" && args.gender !== "female") {
-      throw new Error("Girls hostel students must be Female");
-    }
-
-    const gender = args.gender.toLowerCase() as "male" | "female";
-
-    // Insert Student with userId
-    await ctx.db.insert("student", {
-      fname: args.fname,
-      lname: args.lname,
-      date_of_birth: args.date_of_birth,
-      gender,
-      dept_name: args.dept_name,
-      year_of_study: args.year_of_study,
-      phone: args.phone,
-      email: args.email,
-      address: args.address,
-      room_id: args.roomId,
-      student_password: args.student_password,
-      userId, // link to Convex Auth user
+    await ctx.runMutation(internal.students.addStudentInternal, {
+      ...args,
+      userId: studentUserId,
     });
   },
 });
@@ -104,7 +133,7 @@ export const loginStudent = action({
   },
 
   handler: async (ctx, args) => {
-    // 1. Load staff via query from the action
+   
     const student = await ctx.runQuery(api.students.getByEmail, {
       email: args.email,
     });

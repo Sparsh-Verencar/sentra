@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import bcrypt from "bcryptjs";
 
 import {
@@ -100,7 +100,7 @@ export default function Onboarding_Roles() {
     selectedRoom ? { roomId: selectedRoom } : "skip"
   );
 
-  const addStudent = useMutation(api.students.addStudent);
+  const addStudent = useAction(api.students.addStudent);
 
   const currentCount = students?.length ?? 0;
 const roomCapacity = rooms?.find((r) => r._id === selectedRoom)?.capacity ?? 0;
@@ -178,8 +178,7 @@ const isRoomFull = currentCount >= roomCapacity;
       return;
     }
 
-    // ✅ HASH PASSWORD IN FRONTEND
-    const hashedPassword = await bcrypt.hash(studentPassword, 10);
+    
 
     await addStudent({
       fname,
@@ -194,7 +193,7 @@ const isRoomFull = currentCount >= roomCapacity;
       roomId: selectedRoom,
 
       // ✅ send hashed password
-      student_password: hashedPassword,
+      student_password: studentPassword,
     });
 
     // Reset form
