@@ -116,13 +116,14 @@ export default function Staff_and_Students_Login() {
 };
 
 
-  /* ---------------- STAFF LOGIN ---------------- */
-  const handleStaffLogin = async () => {
-    const res = await loginStaff({
-      email: staffEmail,
-      password: staffPassword,
-    });
-
+/* ---------------- STAFF LOGIN ---------------- */
+const handleStaffLogin = async () => {
+  const res = await loginStaff({
+    email: staffEmail,
+    password: staffPassword,
+  });
+  
+    router.push("/staff-dashboard");
     alert(res.message);
   };
 
