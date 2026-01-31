@@ -112,7 +112,7 @@ export default function Staff_and_Students_Login() {
     password: studentPassword,
     flow: "signIn",
   });
-  router.push("/StudentInfo");
+  router.push("/student-dashboard/student-info");
 };
 
 
