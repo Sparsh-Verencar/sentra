@@ -25,7 +25,8 @@ Managing hostels manually is inefficient and error-prone. This system digitizes 
 
 ### 🧱 Tech Stack
 - **Frontend:** Next.js (App Router), shadcn/ui, Tailwind CSS  
-- **Backend & Database:** Convex  
+- **Backend & Database:** Convex
+- **Authentication:** Convex Auth
 
 ### ✨ Core Features
 - Role-based access and permissions  
@@ -38,3 +39,12 @@ Managing hostels manually is inefficient and error-prone. This system digitizes 
 - Real-time notifications  
 - Mobile responsiveness improvements  
 - AI-based complaint categorization  
+
+### ER Diagram
+<img width="2538" height="1350" alt="image" src="https://github.com/user-attachments/assets/070c3c89-5df8-44f8-a944-eb4625009999" />
+
+### Relational Schema
+<img width="2051" height="1429" alt="image" src="https://github.com/user-attachments/assets/2b890a03-c707-4cd6-a3b2-5ae3ec67a205" />
+
+### Dicussion
+<img width="2126" height="1184" alt="image" src="https://github.com/user-attachments/assets/27fea972-5aaf-4edd-bed5-e4858a106e51" />
