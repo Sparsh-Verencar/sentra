@@ -16,6 +16,7 @@ const LostAndFound = () => {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const createLostItemWithLost = useMutation(api.lostItem.createLostItemWithLost);
   const currentStudent = useQuery(api.students.getCurrentStudent);
+  const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL as string;
 
   const [showForm, setShowForm] = useState(false);
   const [itemName, setItemName] = useState("");
@@ -23,6 +24,7 @@ const LostAndFound = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
 
   const uploadImage = async (file: File) => {
     const uploadUrl = await generateUploadUrl();
@@ -78,17 +80,50 @@ const LostAndFound = () => {
         )}
 
         {posts?.map((post) => (
-          <Card key={post._id}>
-            <CardContent className="p-4 space-y-1">
+          <Card
+            key={post._id}
+            className="cursor-pointer"
+            onClick={() =>
+              setExpandedPostId(expandedPostId === post._id ? null : post._id)
+            }
+          >
+            <CardContent className="p-4 space-y-2">
+              {/* Student Name */}
               <p className="font-semibold">
                 {post.student.fname} {post.student.lname}
               </p>
-              <p className="text-xs text-muted-foreground">{post.date}</p>
-              <p className="mt-2 font-medium">{post.item.item_name}</p>
-              <p className="text-sm">{post.item.description}</p>
+
+              {/* Lost Item Name */}
+              <p className="mt-1 font-medium">{post.item.item_name}</p>
+
+              {/* Image */}
+              {post.item.image_id && (
+                <img
+                  src={`${convexSiteUrl}/files?id=${post.item.image_id}`}
+                  alt={post.item.item_name}
+                  className="h-60 w-auto object-cover rounded-md mt-2"
+                />
+              )}
+
+              {/* Date */}
+              <p className="text-xs text-muted-foreground">
+                {new Date(post.date).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+
+              {/* Description (expandable) */}
+              {expandedPostId === post._id && (
+                <p className="text-sm mt-2">{post.item.description}</p>
+              )}
             </CardContent>
           </Card>
         ))}
+
       </div>
 
       {/* Form */}
