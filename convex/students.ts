@@ -168,14 +168,72 @@ export const loginStudent = action({
   },
 });
 //STUDENT DELETE
+
+
 export const deleteStudent = mutation({
   args: {
     studentId: v.id("student"),
   },
+
   handler: async (ctx, args) => {
+    // ✅ Admin must be logged in
+    const adminId = await getAuthUserId(ctx);
+    if (!adminId) throw new Error("Not authenticated");
+
+    // ✅ Step 1: Get student record
+    const student = await ctx.db.get(args.studentId);
+    if (!student) throw new Error("Student not found");
+
+    // ✅ Step 2: Extract userId
+    const studentUserId = student.userId;
+    if (!studentUserId) throw new Error("Student has no linked userId");
+
+    /* ------------------------------------------------------ */
+    /* ✅ DELETE EVERYTHING RELATED TO THIS USER ID             */
+    /* ------------------------------------------------------ */
+
+    // ✅ 1. Delete authAccounts
+    const authAccounts = await ctx.db
+      .query("authAccounts")
+      .filter((q) => q.eq(q.field("userId"), studentUserId))
+      .collect();
+
+    for (const acc of authAccounts) {
+      await ctx.db.delete(acc._id);
+    }
+
+    // ✅ 2. Delete authSessions
+    const sessions = await ctx.db
+      .query("authSessions")
+      .filter((q) => q.eq(q.field("userId"), studentUserId))
+      .collect();
+
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+
+   
+   
+
+    // ✅ 5. Delete user itself
+    await ctx.db.delete(studentUserId);
+
+    /* ------------------------------------------------------ */
+    /* ✅ FINALLY DELETE STUDENT RECORD                         */
+    /* ------------------------------------------------------ */
+
     await ctx.db.delete(args.studentId);
+
+    return {
+      success: true,
+      message: "Student and all auth data deleted completely",
+    };
   },
 });
+
+
+
 
 //UPDATE STUDENTS
 export const updateStudentDetails = mutation({
