@@ -39,7 +39,7 @@ const data = {
     },
     {
       title: "Complaints",
-      url: "/admin-dashboard",
+      url: "/admin-dashboard/complaints",
       icon: Book,
     },
     {
