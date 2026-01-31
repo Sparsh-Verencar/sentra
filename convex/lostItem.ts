@@ -32,15 +32,14 @@ export const createLostItemWithLost = mutation({
 
 // convex/lostItem.ts
 export const getAllLostPosts = query({
-  args: {
-    key: v.number(), // dummy argument for refresh
-  },
-  handler: async (ctx, { key }) => {
+  handler: async (ctx) => {
     const lostEntries = await ctx.db.query("lost").collect();
+
     return Promise.all(
       lostEntries.map(async (lost) => {
         const item = await ctx.db.get(lost.item_id);
         const student = await ctx.db.get(lost.student_id);
+
         return {
           _id: lost._id,
           date: lost.lost_date,
@@ -51,4 +50,3 @@ export const getAllLostPosts = query({
     );
   },
 });
-

@@ -9,14 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import type { Id } from "@/convex/_generated/dataModel";
 
 const LostAndFound = () => {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const posts = useQuery(api.lostItem.getAllLostPosts, { key: refreshKey });
+  const posts = useQuery(api.lostItem.getAllLostPosts);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const createLostItemWithLost = useMutation(api.lostItem.createLostItemWithLost);
   const currentStudent = useQuery(api.students.getCurrentStudent);
   const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL as string;
+  const markFound = useMutation(api.found.markItemFound);
+  
 
   const [showForm, setShowForm] = useState(false);
   const [itemName, setItemName] = useState("");
@@ -58,8 +60,17 @@ const LostAndFound = () => {
     setLoading(false);
 
     // Refresh feed
-    setRefreshKey((prev) => prev + 1);
   };
+
+  const handleMarkFound = async (itemId: Id<"lost_item">) => {
+  if (!currentStudent) return;
+
+  await markFound({
+    student_id: currentStudent._id,
+    item_id: itemId, // ✅ correct type
+    found_date: new Date().toISOString(),
+  });
+};
 
 
 
@@ -79,50 +90,88 @@ const LostAndFound = () => {
           </p>
         )}
 
-        {posts?.map((post) => (
-          <Card
-            key={post._id}
-            className="cursor-pointer"
-            onClick={() =>
-              setExpandedPostId(expandedPostId === post._id ? null : post._id)
-            }
-          >
-            <CardContent className="p-4 space-y-2">
-              {/* Student Name */}
-              <p className="font-semibold">
-                {post.student.fname} {post.student.lname}
-              </p>
+        {posts?.map((post) => {
+          const isFound = !!post.found;
 
-              {/* Lost Item Name */}
-              <p className="mt-1 font-medium">{post.item.item_name}</p>
+          return (
+            <Card
+              key={post._id}
+              className="cursor-pointer"
+              onClick={() =>
+                setExpandedPostId(expandedPostId === post._id ? null : post._id)
+              }
+            >
+              <CardContent className="p-4 space-y-2">
+                {/* Student Name */}
+                <p className="font-semibold">
+                  {post.student.fname} {post.student.lname}
+                </p>
 
-              {/* Image */}
-              {post.item.image_id && (
-                <img
-                  src={`${convexSiteUrl}/files?id=${post.item.image_id}`}
-                  alt={post.item.item_name}
-                  className="h-60 w-auto object-cover rounded-md mt-2"
-                />
-              )}
+                {/* Lost Item Name */}
+                <p
+                  className={`mt-1 font-medium ${isFound ? "text-green-600" : "text-red-600"
+                    }`}
+                >
+                  {post.item.item_name}
+                </p>
 
-              {/* Date */}
-              <p className="text-xs text-muted-foreground">
-                {new Date(post.date).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
+                {/* Image */}
+                {post.item.image_id && (
+                  <img
+                    src={`${convexSiteUrl}/files?id=${post.item.image_id}`}
+                    alt={post.item.item_name}
+                    className="h-60 w-auto object-cover rounded-md mt-2"
+                  />
+                )}
 
-              {/* Description (expandable) */}
-              {expandedPostId === post._id && (
-                <p className="text-sm mt-2">{post.item.description}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                {/* Date */}
+                <p className="text-xs text-muted-foreground">
+                  {new Date(post.date).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+
+                {/* Found Info */}
+                {isFound && post.found && (
+                  <p className="text-xs text-green-600">
+                    Found by {post.found.student.fname} {post.found.student.lname} on{" "}
+                    {new Date(post.found.found_date).toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
+
+                {/* Mark as Found button */}
+                {!post.found && post.student._id !== currentStudent?._id && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation(); // ⛔ prevents card toggle
+                      handleMarkFound(post.item._id);
+                    }}
+                  >
+                    Mark as Found
+                  </Button>
+                )}
+
+                {/* Description (expandable) */}
+                {expandedPostId === post._id && (
+                  <p className="text-sm mt-2">{post.item.description}</p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+
 
       </div>
 

@@ -16,6 +16,7 @@ import type * as auth from "../auth.js";
 import type * as authActions from "../authActions.js";
 import type * as block from "../block.js";
 import type * as files from "../files.js";
+import type * as found from "../found.js";
 import type * as hostels from "../hostels.js";
 import type * as http from "../http.js";
 import type * as lostItem from "../lostItem.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   authActions: typeof authActions;
   block: typeof block;
   files: typeof files;
+  found: typeof found;
   hostels: typeof hostels;
   http: typeof http;
   lostItem: typeof lostItem;
